@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title class="anzeige">Timer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #f0f0f0;
+        }
+        .navbar {
+            margin-bottom: 2rem;
+        }
+        .form-label {
+            color: #f0f0f0;
+        }
+        @font-face {
+            font-family: '5by7';
+            src: url('/5by7.ttf') format('truetype');
+        }
+        .anzeige {
+            font-family: '5by7', sans-serif;
+            color: #fafafa;
+            font-size: 32px;
+            line-height: 1.6;
+        }
+        .header {
+            font-family: '5by7', sans-serif;
+            color: #fafafa;
+            font-size: 64px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+   {% include 'navbar.html' %}
+
+    <!-- Hauptinhalt -->
+    <div class="container">
+        <h1 class="header">Timer setzen</h1>
+        <form method="POST">
+  <div class="container">
+    <div class="mb-3">
+      <label class="form-label mt-3">Timer-Zeit (HH:MM:SS)</label>
+      <div class="d-flex">
+        <!-- Stunden -->
+        <select class="form-select me-2" name="hours" required>
+          {% for h in range(0, 24) %}
+            <option value="{{ h }}">{{ '%02d'|format(h) }}</option>
+          {% endfor %}
+        </select>
+
+        <!-- Minuten -->
+        <select class="form-select me-2" name="minutes" required>
+          {% for m in range(0, 60) %}
+            <option value="{{ m }}">{{ '%02d'|format(m) }}</option>
+          {% endfor %}
+        </select>
+
+        <!-- Sekunden -->
+        <select class="form-select" name="seconds" required>
+          {% for s in range(0, 60) %}
+            <option value="{{ s }}">{{ '%02d'|format(s) }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    {% if sent_time %}
+            <div>
+                <p class="anzeige">Timer set at {{ sent_time }}</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3">Send</button>
+  </div>
+</form>
+    </div>
+   <!-- <p><strong>Countdown im Browser:</strong> <span id="browserTimer">00:00:00</span></p>
+
+<script>
+let countdownInterval;
+
+function padZero(value) {
+  return value.toString().padStart(2, '0');
+}
+
+function startLocalCountdown(hours, minutes, seconds) {
+  let totalSeconds = hours * 3600 + minutes * 60 + seconds;
+
+  clearInterval(countdownInterval);  // Vorherigen Timer stoppen
+
+  countdownInterval = setInterval(() => {
+    if (totalSeconds <= 0) {
+      clearInterval(countdownInterval);
+      document.getElementById("browserTimer").textContent = "Fertig!";
+      return;
+    }
+
+    let h = Math.floor(totalSeconds / 3600);
+    let m = Math.floor((totalSeconds % 3600) / 60);
+    let s = totalSeconds % 60;
+
+    document.getElementById("browserTimer").textContent =
+      `${padZero(h)}:${padZero(m)}:${padZero(s)}`;
+
+    totalSeconds--;
+  }, 1000);
+}
+
+function startTimerFromSelection() {
+  const hours = parseInt(document.querySelector('[name="hours"]').value);
+  const minutes = parseInt(document.querySelector('[name="minutes"]').value);
+  const seconds = parseInt(document.querySelector('[name="seconds"]').value);
+
+  startLocalCountdown(hours, minutes, seconds);
+}
+</script> -->
+</body>
+</html>
