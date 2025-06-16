@@ -208,7 +208,7 @@ def landing():
         return render_template("landing.html")
 
 @app.route('/manage_threads')
-def manage_threads:
+def manage_threads():
     global weather_thread_started, timer_thread, notes_thread, send_thread, monitoring_thread
     start_thread_monitoring()
     time.sleep(0.2)
@@ -279,12 +279,12 @@ def notes():
                 if task_time == current_time:
                     time.sleep(0.2)
                     #ascii_message = unidecode.unidecode(task)
-                    ascii_message = calculate_messsage_length(task)
-                    message = "Notes," + ascii_message
+                    #ascii_message = calculate_messsage_length(task)
+                    message = "Notes," + task
                     collect_messages(message)
-                    print(message)
-                    print("Note sent")
-                    print(note_collection)
+                    #print(message)
+                    #print("Note sent")
+                    #print(note_collection)
                     del note_collection[task_time]  # Sicheres Löschen
                     time.sleep(1)
                     #TODO Thread beenden
@@ -420,9 +420,9 @@ async def get_song_info():
         album = media_properties.album_title
         if str(title) != last_song:
             message = str(title)
-            ascii_message = unidecode.unidecode(message)
-            ascii_message = calculate_messsage_length(ascii_message)
-            collect_messages("Music," + ascii_message)
+            #ascii_message = unidecode.unidecode(message)
+            #ascii_message = calculate_messsage_length(ascii_message)
+            collect_messages("Music," + message)
 
             print(f"Title: {title}")
             print(f"Artist: {artist}")
@@ -469,9 +469,13 @@ def send():
                 message: str = str(messages.pop())
                 messages.reverse()
 
-                #ascii_message = unidecode.unidecode(message)
-                #message = calculate_messsage_length(message)
-                s.sendall(message.encode("utf-8"))
+                mode, value = message.strip().split(",")
+                #ascii_message = unidecode.unidecode(value)
+                message_length = calculate_messsage_length(value)
+                new_message = mode + "," + message_length
+
+                s.sendall((new_message + "\n").encode("ascii"))
+                print("Message: " + new_message)
                 data = b""
                 while not data.endswith(b'\n'):
                     part = s.recv(1024)
@@ -483,12 +487,40 @@ def send():
                 time.sleep(2) #TODO erst wenn Signal von ESP kommt, weiter machen
 
 def calculate_messsage_length(ascii_message):
-    text_size = len(ascii_message) * 5 #approximately 5 pixels per letter
-    if text_size > 55:
-        new_text = ascii_message[:10] + "."
-        ascii_message = new_text
+    char_sizes = {}
+    length = 0
+    pixel_amount = 62
+    with open("character_size.csv", "r", encoding="utf-8") as file:
+        for line in file:
+            parts = line.strip().split(",")
+            if len(parts) >= 3:
+                char = parts[0]
+                width = int(parts[1])
+                height = int(parts[2])
+                char_sizes[char] = (width, height)
+
+        for letter in ascii_message:
+            if letter in char_sizes:
+                width, height = char_sizes[letter]
+                length = length + width + 1 #Sum all lengths, for space between letters + 1 TODO Leertaste mit hinzufügen
+            else:
+                length = length + 5
+
+
+        print("Length: " + str(length))
+
+        if length > pixel_amount:
+            for x in ascii_message:
+                last_letter = ascii_message[-1]
+                width, height = char_sizes.get(last_letter, (4, 7))
+                length = length - width - 1
+                ascii_message = ascii_message[:-1]
+                if length <= pixel_amount:
+                    ascii_message = ascii_message + "."
+                    print("New length: " + str(length))
+                    break
+        print("return")
         return ascii_message
-    return ascii_message
 
 def start_thread_monitoring():
     global monitoring_thread
