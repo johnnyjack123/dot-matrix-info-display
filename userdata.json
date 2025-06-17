@@ -1,8 +1,10 @@
 {
-  "userdata": [
-    {
-      "username": "Joni",
-      "ip": "192.168.178.42"
-    }
-  ]
+    "userdata": [
+        {
+            "username": "Joni",
+            "ip": "192.168.178.42",
+            "weather_api_key": "f16048e6b70dfde733c42b2d26f7e0e1",
+            "city": "Dresden"
+        }
+    ]
 }

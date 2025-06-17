@@ -17,11 +17,20 @@ import serial.tools.list_ports
 import unidecode
 
 
-API_KEY = "f16048e6b70dfde733c42b2d26f7e0e1"  # ← hier deinen API-Key einfügen
-stadt = "Dresden"
-url = f"http://api.openweathermap.org/data/2.5/weather?q={stadt}&appid={API_KEY}&units=metric&lang=de"
-
 app = Flask(__name__)
+
+@app.route('/')
+def index():
+    stop_clock()
+    stop_weather()
+    stop_music()
+    with open("userdata.json", "r", encoding="utf-8") as file:
+        data = json.load(file)
+        if data.get("userdata") and any("username" in user for user in data["userdata"]):
+            return redirect(url_for("connect"))
+        else:
+            return render_template("landing.html")
+
 
 arduino_port = 'COM6'
 baud_rate = 9600
@@ -59,11 +68,48 @@ last_song = ""
 transmission_method = ""
 
 title = ""
+current_title = ""
 
-@app.route('/')
-def index():
+running_threads = []
+sleeping_threads = []
+
+esp_ip = ""
+port = 1234
+
+connection = True #State variable to check if esp is connected or not
+
+@app.route('/connect')
+def connect():
+    return render_template("connect.html")
+
+@app.route('/check_connection')
+def check_connection():
+    global esp_ip, port
+    try:
+        with open("userdata.json", "r", encoding="utf-8") as file:
+            data = json.load(file)
+            userdata = data.get("userdata", [])
+            if userdata:
+                esp_ip = userdata[-1]["ip"]
+            else:
+                return jsonify({"connected": False})
+
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(1)  # max. 1 Sekunde warten
+            s.connect((esp_ip, port))
+            start_get_time()
+            start_send()
+            start_thread_monitoring()
+            return jsonify({"connected": True})
+    except Exception as e:
+        return jsonify({"connected": False})
+
+
+@app.route('/dashboard')
+def dashboard():
     stop_clock()
     stop_weather()
+    stop_music()
     with open("userdata.json", "r", encoding="utf-8") as file:
         data = json.load(file)
         if data.get("userdata") and any("username" in user for user in data["userdata"]):
@@ -73,12 +119,12 @@ def index():
         else:
             return render_template("landing.html")
 
-
 @app.route('/clock')
 def clock():
     global now
     start_clock()
     stop_weather()
+    stop_music()
     return render_template('clock.html', year=now[0], month=now[1], day=now[2], hour=now[3], minute=now[4])
 
 @app.route('/stop_clock')
@@ -86,23 +132,12 @@ def stop_clock_route():
     stop_clock()
     return redirect(url_for('index'))
 
-@app.route('/api/time')
-def api_time():
-    global now
-    #now = datetime.now()
-    return jsonify({
-        'day': now[2],
-        'month': now[1],
-        'year': now[0],
-        'hour': f"{now[3]:02}",
-        'minute': f"{now[4]:02}"
-    })
-
 @app.route('/timer', methods=['GET', 'POST'])
 def timer_page():
     global hours, minutes, seconds
     stop_clock()
     stop_weather()
+    stop_music()
     if not state_timer:
         if request.method == 'POST':
             hours = request.form['hours']
@@ -110,14 +145,12 @@ def timer_page():
             seconds = request.form['seconds']
             timer_time = hours + "/" + minutes + "/" + seconds
             message = f"Timer,{timer_time}"
-            #ser.write(message.encode('utf-8'))
             collect_messages(message)
             start_timer()
             return render_template('timer.html', sent_time=timer_time)
     else:
         timer_time = str(hours) + "/" + str(minutes) + "/" + str(seconds)
         message = f"Timer,{timer_time}"
-        #ser.write(message.encode('utf-8'))
         collect_messages(message)
     return render_template('timer.html', sent_time=None)
 
@@ -126,16 +159,15 @@ def music():
     global title
     stop_clock()
     stop_weather()
-    #asyncio.run(get_song_info())
     start_music()
     time.sleep(0.2)
+    send_music(title)
+    print("Title: " + title)
     return render_template('music.html', title=title)
 
 @app.route('/notes', methods=['GET', 'POST'])
 def display_notes():
     global note, remind_time, notes_thread, note_collection
-    stop_clock()
-    stop_weather()
     if request.method == 'POST':
         if request.method == 'POST':
             if 'delete' in request.form:
@@ -157,11 +189,13 @@ def display_notes():
 def simhub():
     stop_clock()
     stop_weather()
+    stop_music()
     return render_template('simhub.html')
 
 @app.route('/weather')
 def weather():
     stop_clock()
+    stop_music()
     start_weather()
     time.sleep(0.4)
     return render_template('weather.html', temperature=rounded_temperature)
@@ -181,6 +215,31 @@ def api_music():
     global title
     return jsonify({"title": title})
 
+@app.route('/api/time')
+def api_time():
+    global now
+    #now = datetime.now()
+    return jsonify({
+        'day': now[2],
+        'month': now[1],
+        'year': now[0],
+        'hour': f"{now[3]:02}",
+        'minute': f"{now[4]:02}"
+    })
+
+@app.route('/api/threads')
+def api_threads():
+    global running_threads, sleeping_threads
+    return jsonify({
+        "running_threads": running_threads,
+        "sleeping_threads": sleeping_threads
+    })
+
+@app.route('/api/connection')
+def api_connection():
+    global connection
+    return jsonify({"connection": connection})
+
 @app.route('/landing', methods=['GET', 'POST'])
 def landing():
     with open("userdata.json", "r", encoding="utf-8") as file:
@@ -194,7 +253,10 @@ def landing():
     new_entry = {
         "username": request.form["username"],
         "ip": request.form["ip"],
+        "weather_api_key": request.form.get("weather_api_key"),
+        "city": request.form.get("city")
     }
+
     data["userdata"].append(new_entry)
 
     # Speichern
@@ -207,26 +269,56 @@ def landing():
     else:
         return render_template("landing.html")
 
-@app.route('/manage_threads')
+@app.route('/manage_threads', methods=["POST", "GET"])
 def manage_threads():
-    global weather_thread_started, timer_thread, notes_thread, send_thread, monitoring_thread
-    start_thread_monitoring()
-    time.sleep(0.2)
-    running_threads = []
-    sleeping_threads = []
-    threads = [{ "name": "weather_thread_started", "value": weather_thread_started }, {"name": "timer_thread", "value": timer_thread}, {"name": "notes_thread", "value": notes_thread}, {"name": "send_thread", "value": send_thread}, {"name": "monitoring_thread", "value": monitoring_thread}]
-    for thread in threads:
-        if thread.value:
-            running_threads.append(thread.name)
-        else:
-            sleeping_threads.append(thread.name)
+    global weather_thread_started, timer_thread, notes_thread, send_thread, monitoring_thread, running_threads, sleeping_threads
 
-    return render_template("thread_monitoring.html", running_threads, sleeping_threads)
+    return render_template("thread_monitoring.html", running_threads=running_threads, sleeping_threads=sleeping_threads)
+
+@app.route('/settings', methods=["POST", "GET"])
+def settings():
+    with open("version.txt", "r", encoding="utf-8") as file:
+        version = "Version: " + str(file.read().strip())
+    if request.method == "POST":
+        username = request.form.get("username")
+        esp_ip = request.form.get("ip")
+        api_key = request.form.get("weather_api_key")
+        city = request.form.get("city")
+
+        # Datei laden
+        with open("userdata.json", "r", encoding="utf-8") as file:
+            data = json.load(file)
+
+        # Wenn keine userdata vorhanden ist, lege eine leere Liste an
+        if not data.get("userdata") or not isinstance(data["userdata"], list):
+            data["userdata"] = [{}]
+
+        # Nimm nur den ersten Benutzer-Eintrag
+        user = data["userdata"][0]
+
+        if username:
+            user["username"] = username
+        if esp_ip:
+            user["ip"] = esp_ip
+        if api_key:
+            user["weather_api_key"] = api_key
+        if city:
+            user["city"] = city
+
+        # Stelle sicher, dass NUR EIN Benutzer gespeichert wird
+        data["userdata"] = [user]
+
+        # Datei zurückschreiben
+        with open("userdata.json", "w", encoding="utf-8") as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
+
+    return render_template("settings.html", version=version)
 
 def start_timer():
     global timer_thread
     if not timer_thread:
         time.sleep(1.5)
+        timer_thread = True
         thread = threading.Thread(target=timer, daemon=True)
         thread.start()
 
@@ -238,7 +330,6 @@ def timer():
     global hours, minutes, seconds, state_timer
     while True:
         state_timer = True
-        #print("Timer is running")
         time.sleep(1)
         if int(seconds) > 0:
             seconds = int(seconds) - 1
@@ -252,6 +343,9 @@ def timer():
                     #ser.write("Timer,Break".encode('utf-8'))
                     collect_messages("Timer,Break")
                     stop_timer()
+                    stop_music()
+                    stop_weather()
+                    stop_clock()
                     state_timer = False
                     break
                 else:
@@ -290,7 +384,11 @@ def notes():
                     #TODO Thread beenden
 
                     if not len(note_collection) > 0:
-                        notes_thread = True
+                        #notes_thread = True
+                        stop_notes()
+                        stop_music()
+                        stop_weather()
+                        stop_clock()
                         return
                 time.sleep(1)
         time.sleep(1)
@@ -335,35 +433,45 @@ def stop_weather():
 def send_weather_loop():
     last_minute = ""
     count = 14
-    while weather_thread_started:
-        global now
-        #now = datetime.now()
-        #minute = now.minute
-        if now[4] != last_minute:
-            count = count + 1
-            last_minute = now[4]
-            print(count)
-            if count == 15:
-                try:
-                    answer = requests.get(url)
-                    daten = answer.json()
-                    if answer.status_code == 200:
-                        global rounded_temperature
-                        temperature = daten["main"]["temp"]
-                        rounded_temperature = round(temperature, 1)
-                        message = "Weather," + str(rounded_temperature)
-                        #ser.write(message.encode('utf-8'))
-                        #send(message)
-                        collect_messages(message)
-                        count = 0
-                        print("New temperature set")
-                    else:
-                        print("Unable to get weather datas")
-                except Exception as e:
-                    print("Unable to send message")
-        else:
-            time.sleep(1)
-    print("Weather stopped")
+    with open("userdata.json", "r", encoding="utf-8") as file:
+        data = json.load(file)
+        if data.get("userdata") and any("username" in user for user in data["userdata"]):
+            userdata = data["userdata"]
+            for user in userdata:
+                if "weather_api_key" in user and "city" in user:
+                    # print("API Key:", user["weather_api_key"])
+                    API_KEY = user["weather_api_key"]
+                    # print("API Key:", user["weather_api_key"])
+                    stadt = user["city"]
+                    # stadt = "Dresden"
+                    url = f"http://api.openweathermap.org/data/2.5/weather?q={stadt}&appid={API_KEY}&units=metric&lang=de"
+
+        while weather_thread_started:
+            global now
+            if now[4] != last_minute:
+                count = count + 1
+                last_minute = now[4]
+                print(count)
+                if count == 15:
+                    try:
+                        answer = requests.get(url)
+                        daten = answer.json()
+                        if answer.status_code == 200:
+                            global rounded_temperature
+                            temperature = daten["main"]["temp"]
+                            rounded_temperature = round(temperature, 1)
+                            message = "Weather," + str(rounded_temperature)
+                            collect_messages(message)
+                            count = 0
+                            print("New temperature set")
+                        else:
+                            print("Unable to get weather datas")
+                            rounded_temperature = "Weather unavailable"
+                    except Exception as e:
+                        print("Unable to send message")
+            else:
+                time.sleep(1)
+
 
 # Hintergrundfunktion: Jede Minute Uhrzeit senden
 def clock_loop():
@@ -371,15 +479,10 @@ def clock_loop():
     last_minute = -1
     global running_clock
     while running_clock:
-        #now = datetime.now()
         if now[4] != last_minute:
             message = f"Clock,{now[2]}/{now[1]}/{now[0]}/{now[3]}/{now[4]}"
-            #send(message)
-            #ser.write(message.encode('utf-8'))
             collect_messages(message)
-            #print("Gesendet:", message)
             last_minute = now[4]
-            #clock()
         time.sleep(1)
 
 def start_clock():
@@ -400,8 +503,15 @@ def start_music():
         thread = threading.Thread(target=get_music, daemon=True)
         thread.start()
 
+def stop_music():
+    global music_thread_started, title, current_title
+    music_thread_started = False
+    title = ""
+    current_title = ""
+
 def get_music():
-    while True:
+    global music_thread_started
+    while music_thread_started:
         asyncio.run(get_song_info())
         time.sleep(2)
 
@@ -419,11 +529,11 @@ async def get_song_info():
         artist = media_properties.artist
         album = media_properties.album_title
         if str(title) != last_song:
-            message = str(title)
+            #message = str(title)
             #ascii_message = unidecode.unidecode(message)
             #ascii_message = calculate_messsage_length(ascii_message)
-            collect_messages("Music," + message)
-
+            #collect_messages("Music," + message)
+            send_music(title)
             print(f"Title: {title}")
             print(f"Artist: {artist}")
             print(f"Album: {album}")
@@ -432,8 +542,12 @@ async def get_song_info():
     else:
         print("No active media session found.")
 
-# Run the async function
-
+def send_music(song):
+    global current_title
+    if title != "":
+        if title != current_title:
+            collect_messages("Music," + title)
+            current_title = title
 
 def start_send():
     global send_thread
@@ -447,7 +561,7 @@ def collect_messages(value: str):
     messages.append(value)
 
 def send():
-    global messages
+    global messages, esp_ip, port, connection
     with open("userdata.json", "r", encoding="utf-8") as file:
         data = json.load(file)
         userdata = data["userdata"]
@@ -457,34 +571,48 @@ def send():
             print("ESP IP:", esp_ip)
         else:
             print("No userdata available")
-    port = 1234
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((esp_ip, port))
-        print("Connected with ESP")
-        while True:
-            #print("Send is running")
-            time.sleep(0.1)
-            if len(messages) != 0:
-                messages.reverse()
-                message: str = str(messages.pop())
-                messages.reverse()
 
-                mode, value = message.strip().split(",")
-                #ascii_message = unidecode.unidecode(value)
-                message_length = calculate_messsage_length(value)
-                new_message = mode + "," + message_length
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.connect((esp_ip, port))
+            print("Connected with ESP")
+            while True:
+                time.sleep(0.1)
+                if len(messages) != 0:
+                    messages.reverse()
+                    message: str = str(messages.pop())
+                    messages.reverse()
 
-                s.sendall((new_message + "\n").encode("ascii"))
-                print("Message: " + new_message)
-                data = b""
-                while not data.endswith(b'\n'):
-                    part = s.recv(1024)
-                    if not part:
-                        break
-                    data += part
+                    mode, value = message.strip().split(",", 1)
+                    ascii_message = unidecode.unidecode(value)
+                    if not mode == "Clock" or mode == "Timer" or mode == "Weather":
+                        message_length = calculate_messsage_length(ascii_message)
+                        new_message = mode + "," + message_length
+                        s.sendall((new_message + "\n").encode("ascii"))
+                        print("Message: " + new_message)
+                    else:
+                        s.sendall((message + "\n").encode("ascii"))
+                        print("Message: " + message)
+                    time.sleep(2)
+                #TODO Checking Connection
+                #try:
+                    #s.sendall(("Connection,Connection" + "\n").encode("ascii"))
+                    #data = b""
+                    #while not data.endswith(b'\n'):
+                        #part = s.recv(1024)
+                        #if not part:
+                            #break
+                        #data += part
 
-                print("Answer from ESP:", data.decode("utf-8").strip())
-                time.sleep(2) #TODO erst wenn Signal von ESP kommt, weiter machen
+                    #print("Answer from ESP:", data.decode("utf-8").strip())
+                    #if data.decode("utf-8").strip():
+                        #connection = True
+                    #else:
+                        #connection = False
+                    #print("Connection: " + str(connection))
+
+                #except Exception as e:
+                    #connection = True
+                    #print("Connection: " + str(connection))
 
 def calculate_messsage_length(ascii_message):
     char_sizes = {}
@@ -530,28 +658,26 @@ def start_thread_monitoring():
         thread.start()
 
 def thread_monitoring():
-    global weather_thread_started, timer_thread, notes_thread, send_thread, monitoring_thread
+    global weather_thread_started, timer_thread, notes_thread, send_thread, monitoring_thread, running_threads, sleeping_threads
     while True:
-        if weather_thread_started:
-            print("Weather is running")
-        if timer_thread:
-            print("Timer is running")
-        if notes_thread:
-            print("Note is running")
-        if send_thread:
-            print("Send is running")
-        if monitoring_thread:
-            print("Monitoring is running")
-        print("---\n")
-        time.sleep(10)
+        running_threads = []
+        sleeping_threads = []
+        threads = [{"name": "Weather", "value": weather_thread_started},
+                   {"name": "Timer", "value": timer_thread},
+                   {"name": "Notes", "value": notes_thread},
+                   {"name": "Send", "value": send_thread},
+                   {"name": "Thread Monitoring", "value": monitoring_thread},
+                   {"name": "Music", "value": music_thread_started},
+                   {"name": "Clock", "value": clock_thread}]
+        for thread in threads:
+            if thread["value"]:
+                running_threads.append(thread["name"])
+            else:
+                sleeping_threads.append(thread["name"])
+        time.sleep(3)
 
 def start_flask():
     app.run()
-
-
-start_get_time()
-start_send()
-start_thread_monitoring()
 
 # Start
 if __name__ == '__main__':

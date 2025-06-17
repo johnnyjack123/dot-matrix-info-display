@@ -133,7 +133,7 @@ void handleClientInput() {
         Serial.print("Empfangen: ");
         Serial.println(msg);
         input = msg;
-        client.println("OK: " + msg);  // Antwort zurückschicken
+        client.println("OK");  // Antwort zurückschicken
         client.flush();                // Warten, bis alles gesendet wurde
         //delay(100);
       }
@@ -226,6 +226,7 @@ void timer(String time) {
     parts[1] = "";
     nextMode = "";
     value = "";
+    input = "";
   }
   /*else {
     alert();
@@ -260,7 +261,7 @@ void clock(String time) {
     }
     if (currentTime != lastTime) {
       char date[10];
-      sprintf(date, "%02d.%02d", clockParts[0].toInt(), clockParts[1].toInt());
+      sprintf(date, "%02d.%02d.", clockParts[0].toInt(), clockParts[1].toInt());
       Serial.println(date);
       char time[10];
       sprintf(time, "%02d:%02d", clockParts[3].toInt(), clockParts[4].toInt());
@@ -296,6 +297,7 @@ void clock(String time) {
   }
   parts[0] = "";
   parts[1] = "";
+  input = "";
 }
 
 void weather(String temperature) {
@@ -313,6 +315,7 @@ void weather(String temperature) {
   parts[1] = "";
   nextMode = "";
   value = "";
+  input = "";
 }
 
 void leds_on() {
@@ -376,16 +379,18 @@ void notes(String note) {
 }
 
 void music(String title) {
+  if (title == ""){
+    Serial.println("Title empty");
+  }
   char song_title[30];
   sprintf(song_title, "%s", title.c_str());
-  Serial.print(song_title);
+  //Serial.print(song_title);
   P.displayClear();
-
+  
   P.displayZoneText(2, song_title, PA_LEFT, 100, 0, PA_PRINT, PA_NO_EFFECT);
   P.displayAnimate();
   nextMode = "";
   value = "";
-
 }
 
 void loop() {
@@ -403,11 +408,13 @@ void loop() {
     if (kommaIndex > 0) {
       parts[0] = input.substring(0, kommaIndex);   // vor dem Komma
       parts[1] = input.substring(kommaIndex + 1);  // nach dem Komma
+      nextMode = parts[0];
+      value = parts[1];
     }
-    nextMode = parts[0];
-    value = parts[1];
     input = "";
   }
+
+
   if (nextMode == "Timer") {
     nextMode = "";
     timer(value);
@@ -432,6 +439,13 @@ void loop() {
   }
   if (nextMode == "Break") {
     timer(value);
+  }
+   if (nextMode == "Connection") {
+    client.println("OK");
+    client.flush();
+    nextMode = "";
+    value = "";
+    input = "";
   }
   delay(10);
 
