@@ -41,7 +41,12 @@
   <div class="spinner"></div>
 
 </div>
+        {% if connection_state %}
+        <p>You have to connect your ESP with the latest firmware to this computer. Afterward press Connect</p>
+        <a href="/initial_connect" class="btn btn-outline-light">Connect</a>
+        {% else %}
     <a href="/dashboard" class="btn btn-outline-light">Skip connection</a>
+        {% endif %}
     </div>
 <script>
         function checkConnection() {

@@ -26,6 +26,11 @@
         <label for="city" class="form-label">Your City</label>
         <input type="text" class="form-control" id="city" name="city" placeholder="Enter your city" />
 
+        <div class="form-check form-switch" style="margin-top: 20px">
+    <input class="form-check-input" type="checkbox" id="switch" name="switch" {% if switch_state %}checked{% endif %}>
+    <label class="form-check-label" for="switch">Launch in app window, otherwise it will start only start in the browser (changes become active after a restart)</label>
+</div>
+
         <button type="submit" class="btn btn-success">Save Settings</button>
         <a href="/manage_threads" class="btn btn-outline-light">Manage Threads</a>
         <a href="/dashboard" class="btn btn-outline-light">Back to Dashboard</a>

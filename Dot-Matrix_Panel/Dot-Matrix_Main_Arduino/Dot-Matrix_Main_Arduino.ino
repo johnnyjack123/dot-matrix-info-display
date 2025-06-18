@@ -73,14 +73,14 @@ void setup() {
     WiFi.begin(ssid, password);
       while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        Serial.print(".");
+        //Serial.print(".");
       }
-      Serial.println("\nConnected via WIFI.");
-      Serial.print("IP address: ");
+      //Serial.println("\nConnected via WIFI.");
+      Serial.print("IP address:");
       Serial.println(WiFi.localIP());
 
       server.begin();
-      Serial.println("Waiting for connection...");
+      //Serial.println("Waiting for connection...");
   
   }
 
@@ -384,7 +384,7 @@ void music(String title) {
   }
   char song_title[30];
   sprintf(song_title, "%s", title.c_str());
-  //Serial.print(song_title);
+  Serial.print(song_title);
   P.displayClear();
   
   P.displayZoneText(2, song_title, PA_LEFT, 100, 0, PA_PRINT, PA_NO_EFFECT);
@@ -396,6 +396,13 @@ void music(String title) {
 void loop() {
   //if (Serial.available())
   //String input = Serial.readStringUntil('\n');  // Lese bis Zeilenumbruch
+  if (Serial.available()) {
+    String request = Serial.readStringUntil('\n');
+    if (request == "GET_IP") {
+      Serial.println(WiFi.localIP());
+    }
+  }
+  
   handleClientInput();
   //P.displayAnimate();
   if (input != ""){
@@ -440,13 +447,7 @@ void loop() {
   if (nextMode == "Break") {
     timer(value);
   }
-   if (nextMode == "Connection") {
-    client.println("OK");
-    client.flush();
-    nextMode = "";
-    value = "";
-    input = "";
-  }
+
   delay(10);
 
   //}

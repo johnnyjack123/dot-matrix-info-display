@@ -14,6 +14,7 @@ from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessio
 import serial.tools.list_ports
 import unidecode
 import os
+import webbrowser
 
 
 app = Flask(__name__)
@@ -82,9 +83,51 @@ port = 1234
 
 connection = True #State variable to check if esp is connected or not
 
-@app.route('/connect')
+@app.route('/initial_connect')
+def initial_connect():
+    with open("userdata.json", "r", encoding="utf-8") as file:
+        data = json.load(file)
+
+    user = data["userdata"][0]
+
+    # Nur wenn IP leer ist, versuche über Seriell die IP zu holen
+    if user.get("ip", "") == "":
+        esp_port = find_esp_port()
+        if not esp_port:
+            return "Kein ESP gefunden"
+
+        try:
+            ser = serial.Serial(esp_port, 9600, timeout=5)
+            ser.write(b"GET_IP\n")
+            #time.sleep(0.05)
+            message = ser.readline().decode("utf-8").strip()
+            while message == "":
+                message = ser.readline().decode("utf-8").strip()
+            ser.close()
+        except Exception as e:
+            return f"Fehler bei serieller Verbindung: {e}"
+
+        # IP speichern
+        user["ip"] = message
+        data["userdata"][0] = user
+
+        with open("userdata.json", "w", encoding="utf-8") as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
+
+    return redirect(url_for("connect"))  # oder render_template(...)
+
+@app.route('/connect', methods=["POST", "GET"])
 def connect():
-    return render_template("connect.html")
+    with open("userdata.json", "r", encoding="utf-8") as file:
+        data = json.load(file)
+        user = data["userdata"][0]
+
+        if user["ip"] == "":
+            connection_state = True
+        else:
+            connection_state = False
+
+    return render_template("connect.html", connection_state=connection_state)
 
 @app.route('/check_connection')
 def check_connection():
@@ -269,7 +312,7 @@ def landing():
 
     # Weiterleitung basierend auf Erfolg
     if data.get("userdata") and any("username" in user for user in data["userdata"]):
-        return render_template("index.html", username=request.form["username"])
+        return render_template("connect.html", username=request.form["username"])
     else:
         return render_template("landing.html")
 
@@ -279,8 +322,32 @@ def manage_threads():
 
     return render_template("thread_monitoring.html", running_threads=running_threads, sleeping_threads=sleeping_threads)
 
+@app.route('/settings_page', methods=["POST", "GET"])
+def settings_page():
+    with open("./Dot-Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
+        version = "Version: " + str(file.read().strip())
+
+        # Datei laden
+        with open("userdata.json", "r", encoding="utf-8") as file:
+            data = json.load(file)
+
+        # Wenn keine userdata vorhanden ist, lege eine leere Liste an
+        if not data.get("userdata") or not isinstance(data["userdata"], list):
+            data["userdata"] = [{}]
+
+        # Nimm nur den ersten Benutzer-Eintrag
+        user = data["userdata"][0]
+        app_window = user["open"]
+        if app_window == "App":
+            switch_state = True
+        else:
+            switch_state = False
+
+        return render_template("settings.html", version=version, switch_state=switch_state)
+
 @app.route('/settings', methods=["POST", "GET"])
 def settings():
+    switch_state = True
     with open("./Dot-Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
         version = "Version: " + str(file.read().strip())
     if request.method == "POST":
@@ -288,6 +355,7 @@ def settings():
         esp_ip = request.form.get("ip")
         api_key = request.form.get("weather_api_key")
         city = request.form.get("city")
+        switch = request.form.get("switch")
 
         # Datei laden
         with open("userdata.json", "r", encoding="utf-8") as file:
@@ -308,6 +376,13 @@ def settings():
             user["weather_api_key"] = api_key
         if city:
             user["city"] = city
+        #if switch:
+        if switch == "on":
+            user["open"] = "App"
+            #switch_state = True
+        else:
+            user["open"] = "Browser"
+            #switch_state = False
 
         # Stelle sicher, dass NUR EIN Benutzer gespeichert wird
         data["userdata"] = [user]
@@ -316,7 +391,8 @@ def settings():
         with open("userdata.json", "w", encoding="utf-8") as file:
             json.dump(data, file, ensure_ascii=False, indent=4)
 
-    return render_template("settings.html", version=version)
+    #return render_template("settings.html", version=version, switch_state=switch_state)
+    return redirect(url_for("settings_page"))
 
 def start_timer():
     global timer_thread
@@ -680,13 +756,43 @@ def thread_monitoring():
                 sleeping_threads.append(thread["name"])
         time.sleep(3)
 
+def find_esp_port():
+    ports = serial.tools.list_ports.comports()
+    for port in ports:
+        beschreibung = port.description.lower()
+        if "ch340" in beschreibung or "silicon" in beschreibung or "cp210" in beschreibung or "usb serial" in beschreibung or "esp" in beschreibung or "arduino" in beschreibung:
+            return port.device  # z. B. 'COM4'
+    return None
+
 def start_flask():
     app.run()
 
 # Start
 if __name__ == '__main__':
-    threading.Thread(target=start_flask, daemon=True).start()
-    webview.create_window("Arduino Zeitsteuerung", "http://127.0.0.1:5000")
-    webview.start()
-    #start_thread_monitoring()
+    # Datei laden
+    with open("userdata.json", "r", encoding="utf-8") as file:
+        data = json.load(file)
 
+    # Wenn keine userdata vorhanden ist, lege eine leere Liste an
+    if not data.get("userdata") or not isinstance(data["userdata"], list):
+        data["userdata"] = [{}]
+
+    # Nimm nur den ersten Benutzer-Eintrag
+    user = data["userdata"][0]
+    app_window = user.get("open", "Browser")  # Standardwert falls nicht gesetzt
+
+    # Starte immer den Flask-Server im Hintergrund
+    threading.Thread(target=start_flask, daemon=True).start()
+
+    if app_window == "App":
+        # Starte Webview (blockierend!)
+        webview.create_window("Arduino Zeitsteuerung", "http://127.0.0.1:5000")
+        webview.start()
+    else:
+        # App soll im Browser laufen – blockiere Hauptthread nicht sofort
+        print("Starte Web-App im Browser")
+        webbrowser.open("http://127.0.0.1:5000")
+
+        # Hauptthread offenhalten, solange Server läuft
+        while True:
+            time.sleep(1)

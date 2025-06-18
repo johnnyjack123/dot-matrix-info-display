@@ -64,10 +64,12 @@ def update():
 def launch_app():
     subprocess.run([r"C:\Users\jonat\Documents\Programmieren\Dot-Matrix-Panel\venv\Scripts\python.exe", "Dot-Matrix_Panel/Dot-Matrix_Main.py"])
 
-if check_internet_connection():
-    print("Internet connection")
+def check_for_updates():
     url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/Thread-Monitoring/Dot-Matrix_Panel/version.txt"
-    path_version = r".\newest_version.txt"
+    path_version = r"tmp\newest_version.txt"
+    folder = os.path.dirname(path_version)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
     response_version = requests.get(url_version)
 
     if response_version.status_code == 200:
@@ -77,7 +79,7 @@ if check_internet_connection():
         try:
             with open("Dot-Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
                 program_version = float(file.read().strip())
-            with open("Dot-Matrix_Panel/tmp/newest_version.txt", "r", encoding="utf-8") as file:
+            with open("tmp/newest_version.txt", "r", encoding="utf-8") as file:
                 new_version = float(file.read().strip())
             if new_version > program_version:
                 update()
@@ -85,12 +87,14 @@ if check_internet_connection():
                 print("Program is up to date")
                 launch_app()
         except Exception as e:
+            print("No version.txt available.")
             update()
-
-
     else:
         print("Program is unreachable")
 
+if check_internet_connection():
+    print("Internet connection")
+    check_for_updates()
 else:
     print("No internet connection")
     launch_app()
