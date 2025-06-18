@@ -25,10 +25,6 @@ def index():
     stop_weather()
     stop_music()
 
-    if not os.path.exists("userdata.json"):
-        with open("userdata.json", "w", encoding="utf-8") as file:
-            json.dump({"userdata": [{}]}, file, ensure_ascii=False, indent=4)
-
     with open("userdata.json", "r", encoding="utf-8") as file:
         data = json.load(file)
         if data.get("userdata") and any("username" in user for user in data["userdata"]):
@@ -769,17 +765,19 @@ def start_flask():
 
 # Start
 if __name__ == '__main__':
-    # Datei laden
-    with open("userdata.json", "r", encoding="utf-8") as file:
-        data = json.load(file)
 
-    # Wenn keine userdata vorhanden ist, lege eine leere Liste an
-    if not data.get("userdata") or not isinstance(data["userdata"], list):
-        data["userdata"] = [{}]
+    if not os.path.exists("userdata.json"):
+        with open("userdata.json", "w", encoding="utf-8") as file:
+            json.dump({"userdata": [{}]}, file, ensure_ascii=False, indent=4)
+            app_window = "App"
+    else:
+        # Datei laden
+        with open("userdata.json", "r", encoding="utf-8") as file:
+            data = json.load(file)
 
-    # Nimm nur den ersten Benutzer-Eintrag
-    user = data["userdata"][0]
-    app_window = user.get("open", "Browser")  # Standardwert falls nicht gesetzt
+        # Nimm nur den ersten Benutzer-Eintrag
+        user = data["userdata"][0]
+        app_window = user.get("open", "App")  # Standardwert falls nicht gesetzt
 
     # Starte immer den Flask-Server im Hintergrund
     threading.Thread(target=start_flask, daemon=True).start()
