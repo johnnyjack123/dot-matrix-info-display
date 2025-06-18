@@ -13,6 +13,7 @@ import asyncio
 from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
 import serial.tools.list_ports
 import unidecode
+import os
 
 
 app = Flask(__name__)
@@ -22,6 +23,11 @@ def index():
     stop_clock()
     stop_weather()
     stop_music()
+
+    if not os.path.exists("userdata.json"):
+        with open("userdata.json", "w", encoding="utf-8") as file:
+            json.dump({"userdata": [{}]}, file, ensure_ascii=False, indent=4)
+
     with open("userdata.json", "r", encoding="utf-8") as file:
         data = json.load(file)
         if data.get("userdata") and any("username" in user for user in data["userdata"]):

@@ -34,12 +34,15 @@
 </head>
 <body>
 
-    <div class="container py-4">
+    <div class="form-container">
         <h1 style="text-align-center" class="header_small" >Waiting for connection to ESP...</h1>
-    </div>
+
     <div class="spinner-wrapper">
   <div class="spinner"></div>
+
 </div>
+    <a href="/dashboard" class="btn btn-outline-light">Skip connection</a>
+    </div>
 <script>
         function checkConnection() {
             fetch('/check_connection')
