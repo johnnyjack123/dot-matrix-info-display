@@ -86,11 +86,10 @@ def initial_connect():
 
     user = data["userdata"][0]
 
-    # Nur wenn IP leer ist, versuche über Seriell die IP zu holen
     if user.get("ip", "") == "":
         esp_port = find_esp_port()
         if not esp_port:
-            return "Kein ESP gefunden"
+            return "No ESP found"
 
         try:
             ser = serial.Serial(esp_port, 9600, timeout=5)
@@ -101,9 +100,8 @@ def initial_connect():
                 message = ser.readline().decode("utf-8").strip()
             ser.close()
         except Exception as e:
-            return f"Fehler bei serieller Verbindung: {e}"
+            return f"Error by serial connection: {e}"
 
-        # IP speichern
         user["ip"] = message
         data["userdata"][0] = user
 
@@ -261,7 +259,6 @@ def api_music():
 @app.route('/api/time')
 def api_time():
     global now
-    #now = datetime.now()
     return jsonify({
         'day': now[2],
         'month': now[1],
@@ -288,11 +285,11 @@ def landing():
     with open("userdata.json", "r", encoding="utf-8") as file:
         data = json.load(file)
 
-    # Stelle sicher, dass "userdata" existiert
+    # Check if userdata is existing
     if "userdata" not in data:
         data["userdata"] = []
 
-    # Füge neuen Eintrag hinzu
+    # Add a new entry
     new_entry = {
         "username": request.form["username"],
         "ip": "",
@@ -303,13 +300,11 @@ def landing():
 
     data["userdata"].append(new_entry)
 
-    # Speichern
+    # Save file
     with open("userdata.json", "w", encoding="utf-8") as file:
         json.dump(data, file, indent=2)
 
-    # Weiterleitung basierend auf Erfolg
     if data.get("userdata") and any("username" in user for user in data["userdata"]):
-        #return render_template("connect.html", username=request.form["username"])
         return redirect(url_for("connect"))
     else:
         return render_template("landing.html")
@@ -325,15 +320,14 @@ def settings_page():
     with open("./Dot-Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
         version = "Version: " + str(file.read().strip())
 
-        # Datei laden
+        # Load file
         with open("userdata.json", "r", encoding="utf-8") as file:
             data = json.load(file)
 
-        # Wenn keine userdata vorhanden ist, lege eine leere Liste an
         if not data.get("userdata") or not isinstance(data["userdata"], list):
             data["userdata"] = [{}]
 
-        # Nimm nur den ersten Benutzer-Eintrag
+        # Takes the first user entry
         user = data["userdata"][0]
         app_window = user["open"]
         if app_window == "App":
@@ -347,50 +341,44 @@ def settings_page():
 def settings():
     switch_state = True
     with open("./Dot-Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
-        version = "Version: " + str(file.read().strip())
-    if request.method == "POST":
-        username = request.form.get("username")
-        esp_ip = request.form.get("ip")
-        api_key = request.form.get("weather_api_key")
-        city = request.form.get("city")
-        switch = request.form.get("switch")
+        if request.method == "POST":
+            username = request.form.get("username")
+            esp_ip = request.form.get("ip")
+            api_key = request.form.get("weather_api_key")
+            city = request.form.get("city")
+            switch = request.form.get("switch")
 
-        # Datei laden
-        with open("userdata.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
+            # Load file
+            with open("userdata.json", "r", encoding="utf-8") as file:
+                data = json.load(file)
 
-        # Wenn keine userdata vorhanden ist, lege eine leere Liste an
-        if not data.get("userdata") or not isinstance(data["userdata"], list):
-            data["userdata"] = [{}]
+            if not data.get("userdata") or not isinstance(data["userdata"], list):
+                data["userdata"] = [{}]
 
-        # Nimm nur den ersten Benutzer-Eintrag
-        user = data["userdata"][0]
+            # Takes the first user entry
+            user = data["userdata"][0]
 
-        if username:
-            user["username"] = username
-        if esp_ip:
-            user["ip"] = esp_ip
-        if api_key:
-            user["weather_api_key"] = api_key
-        if city:
-            user["city"] = city
-        #if switch:
-        if switch == "on":
-            user["open"] = "App"
-            #switch_state = True
-        else:
-            user["open"] = "Browser"
-            #switch_state = False
+            if username:
+                user["username"] = username
+            if esp_ip:
+                user["ip"] = esp_ip
+            if api_key:
+                user["weather_api_key"] = api_key
+            if city:
+                user["city"] = city
 
-        # Stelle sicher, dass NUR EIN Benutzer gespeichert wird
-        data["userdata"] = [user]
+            if switch == "on":
+                user["open"] = "App"
+            else:
+                user["open"] = "Browser"
 
-        # Datei zurückschreiben
-        with open("userdata.json", "w", encoding="utf-8") as file:
-            json.dump(data, file, ensure_ascii=False, indent=4)
+            # Stelle sicher, dass NUR EIN Benutzer gespeichert wird
+            data["userdata"] = [user]
 
-    #return render_template("settings.html", version=version, switch_state=switch_state)
-    return redirect(url_for("settings_page"))
+            # Datei zurückschreiben
+            with open("userdata.json", "w", encoding="utf-8") as file:
+                json.dump(data, file, ensure_ascii=False, indent=4)
+        return redirect(url_for("settings_page"))
 
 def start_timer():
     global timer_thread
@@ -459,7 +447,6 @@ def notes():
                     #print(note_collection)
                     del note_collection[task_time]  # Sicheres Löschen
                     time.sleep(1)
-                    #TODO Thread beenden
 
                     if not len(note_collection) > 0:
                         #notes_thread = True
@@ -490,7 +477,6 @@ def get_time():
         now[4] = minute
         now[5] = second
 
-        #print("Clock is running")
         time.sleep(1)
 
 def start_get_time():
@@ -517,11 +503,8 @@ def send_weather_loop():
             userdata = data["userdata"]
             for user in userdata:
                 if "weather_api_key" in user and "city" in user:
-                    # print("API Key:", user["weather_api_key"])
                     API_KEY = user["weather_api_key"]
-                    # print("API Key:", user["weather_api_key"])
                     stadt = user["city"]
-                    # stadt = "Dresden"
                     url = f"http://api.openweathermap.org/data/2.5/weather?q={stadt}&appid={API_KEY}&units=metric&lang=de"
 
         while weather_thread_started:
@@ -551,7 +534,7 @@ def send_weather_loop():
                 time.sleep(1)
 
 
-# Hintergrundfunktion: Jede Minute Uhrzeit senden
+# Background function to get the time
 def clock_loop():
     global now
     last_minute = -1
@@ -607,10 +590,6 @@ async def get_song_info():
         artist = media_properties.artist
         album = media_properties.album_title
         if str(title) != last_song:
-            #message = str(title)
-            #ascii_message = unidecode.unidecode(message)
-            #ascii_message = calculate_messsage_length(ascii_message)
-            #collect_messages("Music," + message)
             send_music(title)
             print(f"Title: {title}")
             print(f"Artist: {artist}")
