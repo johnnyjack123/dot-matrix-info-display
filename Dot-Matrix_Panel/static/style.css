@@ -3,18 +3,28 @@
     src: url('/static/5by7.ttf') format('truetype');
 }
 
-body {
-    background-color: #121212;
-    color: #f0f0f0;
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    padding: 0;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: url("colorful-abstract-swirl-4k-c4-3840x2160.jpg") no-repeat center center fixed;
+            background-size: cover;
+        }
 
 .container {
     padding: 2rem;
 }
 
+.overlay {
+            height: 100%;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.4); /* optionaler Dark-Overlay für besseren Kontrast */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 /* ------------------ HEADERS ------------------ */
 .header {
     font-family: '5by7', sans-serif;
@@ -43,38 +53,64 @@ body {
     margin-bottom: 1px;
 }
 
-/* ------------------ DISPLAY TEXT ------------------ */
+/* ------------------ Fonts ------------------ */
 .anzeige {
     font-family: '5by7', sans-serif;
-    font-size: 6vw;
+    font-size: 12vw;
     color: #f70000;
-    background-color: #000000;
-    border: 4px solid #f70000;
-    padding: 1rem 2rem;
-    border-radius: 8px;
-    display: inline-block;
-    max-width: 100%;
-    word-wrap: break-word;
-    box-shadow: 0 0 20px #f70000aa;
     text-align: center;
+
+}
+
+.text {
+    font-family: "Poppins", sans-serif;
+    font-size: 15px;
+    color: #aefcc3;
     margin-top: 2rem;
 }
 
 /* ------------------ FORMS ------------------ */
-.form-container {
-    background-color: #1f1f1f;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-    max-width: 600px;
-    margin: auto;
-    margin-top: 1rem;
-    margin-bottom: 2rem;
+.form-container-connect-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }
+
+.form-container-settings-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.form-settings-container {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            box-shadow: 0 4px 100px rgba(0, 0, 0, 5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 2rem;
+        }
+
+.form-pages-container {
+            background: rgba(10, 10, 10, 0.25);
+            border-radius: 16px;
+            box-shadow: 0 4px 100px rgba(0, 0, 0, 5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 1rem;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 2rem;
+        }
 
 .form-label {
     margin-top: 15px;
-    color: #d1d1d1;
+    color: #f7f5f5;
 }
 
 .form-control {
@@ -85,6 +121,27 @@ body {
 
 .form-control::placeholder {
     color: #888;
+}
+input.form-control {
+    background: rgba(0, 0, 0, 0.4); /* dunkler Glaslook */
+    border: 1px solid rgba(255, 255, 255, 0.3); /* heller Rahmen */
+    color: white;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+input.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+input.form-control:focus {
+    border-color: #66ffe5;
+    outline: none;
+    background: rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 8px rgba(102, 255, 229, 0.3);
 }
 
 .btn-success {

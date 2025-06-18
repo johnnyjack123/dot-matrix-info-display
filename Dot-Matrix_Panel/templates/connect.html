@@ -33,40 +33,41 @@
     </style>
 </head>
 <body>
+<div class="form-container-connect-wrapper">
+    <div class="form-settings-container">
+        <h1 class="header_small">Waiting for connection to ESP...</h1>
 
-    <div class="form-container">
-        <h1 style="text-align-center" class="header_small" >Waiting for connection to ESP...</h1>
+        <div class="spinner-wrapper">
+            <div class="spinner"></div>
+        </div>
 
-    <div class="spinner-wrapper">
-  <div class="spinner"></div>
-
-</div>
         {% if connection_state %}
         <p>You have to connect your ESP with the latest firmware to this computer. Afterward press Connect</p>
         <a href="/initial_connect" class="btn btn-outline-light">Connect</a>
         {% else %}
-    <a href="/dashboard" class="btn btn-outline-light">Skip connection</a>
+        <a href="/dashboard" class="btn btn-outline-light">Skip connection</a>
         {% endif %}
     </div>
+</div>
 <script>
-        function checkConnection() {
-            fetch('/check_connection')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.connected) {
-                        window.location.href = "/dashboard";  // Zielroute
-                    } else {
-                        setTimeout(checkConnection, 1000); // Wiederholen nach 1s
-                    }
-                })
-                .catch(error => {
-                    console.error("Fehler bei der Verbindung:", error);
-                    setTimeout(checkConnection, 1000); // Wiederholen auch bei Fehler
-                });
-        }
+    function checkConnection() {
+        fetch('/check_connection')
+            .then(response => response.json())
+            .then(data => {
+                if (data.connected) {
+                    window.location.href = "/dashboard";  // Zielroute
+                } else {
+                    setTimeout(checkConnection, 1000); // Wiederholen nach 1s
+                }
+            })
+            .catch(error => {
+                console.error("Fehler bei der Verbindung:", error);
+                setTimeout(checkConnection, 1000); // Wiederholen auch bei Fehler
+            });
+    }
 
-        // Starte sofort
-        checkConnection();
-    </script>
+    // Starte sofort
+    checkConnection();
+</script>
 </body>
 </html>
