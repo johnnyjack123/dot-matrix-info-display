@@ -118,7 +118,7 @@ def connect():
         data = json.load(file)
         user = data["userdata"][0]
 
-        if user["ip"] == "":
+        if not user["ip"]:
             connection_state = True
         else:
             connection_state = False
@@ -295,9 +295,10 @@ def landing():
     # Füge neuen Eintrag hinzu
     new_entry = {
         "username": request.form["username"],
-        "ip": request.form["ip"],
+        "ip": "",
         "weather_api_key": request.form.get("weather_api_key"),
-        "city": request.form.get("city")
+        "city": request.form.get("city"),
+        "open": "App"
     }
 
     data["userdata"].append(new_entry)
@@ -308,7 +309,8 @@ def landing():
 
     # Weiterleitung basierend auf Erfolg
     if data.get("userdata") and any("username" in user for user in data["userdata"]):
-        return render_template("connect.html", username=request.form["username"])
+        #return render_template("connect.html", username=request.form["username"])
+        return redirect(url_for("connect"))
     else:
         return render_template("landing.html")
 
@@ -768,7 +770,7 @@ if __name__ == '__main__':
 
     if not os.path.exists("userdata.json"):
         with open("userdata.json", "w", encoding="utf-8") as file:
-            json.dump({"userdata": [{}]}, file, ensure_ascii=False, indent=4)
+            json.dump({"userdata": []}, file, ensure_ascii=False, indent=4)
             app_window = "App"
     else:
         # Datei laden
