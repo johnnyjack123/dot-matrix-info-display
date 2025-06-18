@@ -3,13 +3,11 @@ from datetime import datetime
 import time
 
 #from Demos.win32ts_logoff_disconnected import username
-from eventlet.websocket import utf8validator
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import webview
 import threading
 import requests
 import json
-from pycparser.c_ast import While
 import socket
 import asyncio
 from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
@@ -277,7 +275,7 @@ def manage_threads():
 
 @app.route('/settings', methods=["POST", "GET"])
 def settings():
-    with open("version.txt", "r", encoding="utf-8") as file:
+    with open("./Dot-Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
         version = "Version: " + str(file.read().strip())
     if request.method == "POST":
         username = request.form.get("username")
@@ -618,7 +616,7 @@ def calculate_messsage_length(ascii_message):
     char_sizes = {}
     length = 0
     pixel_amount = 62
-    with open("character_size.csv", "r", encoding="utf-8") as file:
+    with open("./Dot-Matrix_Panel/character_size.csv", "r", encoding="utf-8") as file: #Path origin from Launcher.py script
         for line in file:
             parts = line.strip().split(",")
             if len(parts) >= 3:
