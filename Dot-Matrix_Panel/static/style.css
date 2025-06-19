@@ -57,13 +57,19 @@ body, html {
 .anzeige {
     font-family: '5by7', sans-serif;
     font-size: 12vw;
-    color: #f70000;
+    color: #ff4400;
     text-align: center;
-
+    line-height: 0.9; /* weniger als normal, engerer Abstand */
+    text-shadow:
+        0 0 1px #f70000,
+        0 0 2px #f70000,
+        0 0 2px #ff3b3b,
+        0 0 2px #ff3b3b,
+        0 0 2px #ff1a1a;
 }
 
 .text {
-    font-family: "Poppins", sans-serif;
+    font-family: "5by7", sans-serif;
     font-size: 15px;
     color: #aefcc3;
     margin-top: 2rem;
@@ -123,12 +129,12 @@ body, html {
     color: #888;
 }
 input.form-control {
-    background: rgba(0, 0, 0, 0.4); /* dunkler Glaslook */
+    background: rgba(0, 0, 0, 0.1); /* dunkler Glaslook */
     border: 1px solid rgba(255, 255, 255, 0.3); /* heller Rahmen */
     color: white;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    border-radius: 8px;
+    border-radius: 40px;
     padding: 0.5rem 1rem;
     transition: all 0.2s ease-in-out;
 }
@@ -140,11 +146,29 @@ input.form-control::placeholder {
 input.form-control:focus {
     border-color: #66ffe5;
     outline: none;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(255, 255, 255, 0.5);
     box-shadow: 0 0 8px rgba(102, 255, 229, 0.3);
 }
 
+.btn-glass {
+    font-family: "5by7", sans-serif;
+    margin-top: 20px;
+    width: 100%;
+    font-weight: bold;
+    background: transparent;
+    border: 1px solid white;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-glass:hover {
+    background-color: #00ff88;
+    color: black;
+    box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
+}
+
 .btn-success {
+    font-family: "5by7", sans-serif;
     margin-top: 20px;
     width: 100%;
     font-weight: bold;
@@ -180,10 +204,15 @@ input.form-control:focus {
     color: #f0f0f0 !important;
 }
 
-.nav-link:hover,
+.nav-link:hover {
+color: #000000 !important;
+    text-shadow: 0 0 5px #00ffcc;
+}
+
 .btn-outline-light:hover {
     color: #00ffcc !important;
     text-shadow: 0 0 5px #00ffcc;
+    box-shadow: 0 0 10px #00ff88, 0 0 20px #7dafff;
 }
 
 #connection-status .nav-link {
@@ -202,3 +231,146 @@ input.form-control:focus {
 .text-warning {
     color: #ffcc00 !important;
 }
+
+/* new */
+.nav-wrapper {
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+  position: relative;
+  z-index: 100;
+}
+
+.menu-bar {
+  border-radius: 25px;
+  height: fit-content;
+  display: inline-flex;
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  align-items: center;
+  padding: 0 10px;
+  margin-top: 50px;
+  position: relative;
+  z-index: 0;        /* wichtig, damit hover-bg drüberkommt */
+  overflow: visible; /* <-- erlaubt Überstand */
+}
+
+.menu-bar li {
+  list-style: none;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  padding: 10px 16px;
+  position: relative;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.menu-bar li:hover {
+  color: black;
+}
+
+.hover-bg {
+  position: absolute;
+  top: -4px; /* übersteht oben leicht */
+  left: 0;
+  height: 56px; /* größer als die Glasbar (die hat z.B. 48px) */
+    background: linear-gradient(to right, #00ffcc, #66ff99);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  border-radius: 25px;
+  box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+  z-index: 1;
+  opacity: 0;
+  transform: scale(1);
+}
+
+.menu-bar:hover .hover-bg {
+  opacity: 1;
+}
+
+.menu-bar li.active {
+  font-weight: bold;
+  z-index: 3;
+}
+
+.menu-bar li.active ~ .hover-bg {
+  transform: scale(1.08); /* leicht größer bei "eingerastet" */
+}
+
+
+
+/* ------------------- Switch -------------------*/
+
+.switch input
+{
+  display: none;
+}
+
+.switch
+{
+  display: inline-block;
+  width: 60px; /*=w*/
+  height: 30px; /*=h*/
+  margin: 4px;
+  transform: translateY(5%);
+  position: relative;
+}
+
+.slider
+{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 30px;
+  box-shadow: 0 0 0 2px #f73e00, 0 0 4px #f73e00;
+  cursor: pointer;
+  border: 4px solid transparent;
+  overflow: hidden;
+  transition: 0.2s;
+}
+
+.slider:before
+{
+  position: absolute;
+  content: "";
+  width: 100%;
+  height: 100%;
+  background-color: #f73e00;
+  border-radius: 30px;
+  transform: translateX(-30px); /*translateX(-(w-h))*/
+  transition: 0.2s;
+}
+
+input:checked + .slider:before
+{
+  transform: translateX(30px); /*translateX(w-h)*/
+  background-color: limeGreen;
+}
+
+input:checked + .slider
+{
+  box-shadow: 0 0 0 2px limeGreen, 0 0 8px limeGreen;
+}
+
+.switch200 .slider:before
+{
+  width: 200%;
+  transform: translateX(-82px); /*translateX(-(w-h))*/
+}
+
+.switch200 input:checked + .slider:before
+{
+  background-color: red;
+}
+
+.switch200 input:checked + .slider
+{
+  box-shadow: 0 0 0 2px red, 0 0 8px red;
+}
+

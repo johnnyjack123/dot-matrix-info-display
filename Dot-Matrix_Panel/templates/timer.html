@@ -5,91 +5,84 @@
     <title class="anzeige">Timer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="/static/style.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Navigation -->
-   {% include 'navbar.html' %}
+<!-- Navigation -->
+{% include 'navbar.html' %}
 
-    <!-- Hauptinhalt -->
-    <div class="container">
-        <h1 class="header">Timer setzen</h1>
-        <form method="POST">
-  <div class="form-container">
-    <div class="mb-3">
-      <label class="form-label mt-3">Timer-Zeit (HH:MM:SS)</label>
-      <div class="d-flex">
-        <!-- Stunden -->
-        <select class="form-select me-2" name="hours" required>
-          {% for h in range(0, 24) %}
-            <option value="{{ h }}">{{ '%02d'|format(h) }}</option>
-          {% endfor %}
-        </select>
+<!-- Hauptinhalt -->
+<div class="container">
+    <h1 class="header">Timer</h1>
+    <form method="POST">
+        <div class="form-container-settings-wrapper">
 
-        <!-- Minuten -->
-        <select class="form-select me-2" name="minutes" required>
-          {% for m in range(0, 60) %}
-            <option value="{{ m }}">{{ '%02d'|format(m) }}</option>
-          {% endfor %}
-        </select>
+        <div class="form-settings-container">
+            <div class="mb-3">
+                <div class="d-flex">
+                    <!-- Stunden -->
+                    <select class="form-select me-2" name="hours" required>
+                        {% for h in range(0, 24) %}
+                        <option value="{{ h }}">{{ '%02d'|format(h) }}</option>
+                        {% endfor %}
+                    </select>
 
-        <!-- Sekunden -->
-        <select class="form-select" name="seconds" required>
-          {% for s in range(0, 60) %}
-            <option value="{{ s }}">{{ '%02d'|format(s) }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    {% if sent_time %}
-            <div>
-                <p class="anzeige">Timer set at {{ sent_time }}</p>
+                    <!-- Minuten -->
+                    <select class="form-select me-2" name="minutes" required>
+                        {% for m in range(0, 60) %}
+                        <option value="{{ m }}">{{ '%02d'|format(m) }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <!-- Sekunden -->
+                    <select class="form-select" name="seconds" required>
+                        {% for s in range(0, 60) %}
+                        <option value="{{ s }}">{{ '%02d'|format(s) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if sent_time %}
+                <div>
+                    <p class="header_small">Timer set at {{ sent_time }}</p>
+                </div>
+                {% endif %}
             </div>
-        {% endif %}
-    </div>
 
-    <button type="submit" class="btn btn-outline-light">Submit</button>
-  </div>
-</form>
-    </div>
-   <!-- <p><strong>Countdown im Browser:</strong> <span id="browserTimer">00:00:00</span></p>
-
-<script>
-let countdownInterval;
-
-function padZero(value) {
-  return value.toString().padStart(2, '0');
-}
-
-function startLocalCountdown(hours, minutes, seconds) {
-  let totalSeconds = hours * 3600 + minutes * 60 + seconds;
-
-  clearInterval(countdownInterval);  // Vorherigen Timer stoppen
-
-  countdownInterval = setInterval(() => {
-    if (totalSeconds <= 0) {
-      clearInterval(countdownInterval);
-      document.getElementById("browserTimer").textContent = "Fertig!";
-      return;
-    }
-
-    let h = Math.floor(totalSeconds / 3600);
-    let m = Math.floor((totalSeconds % 3600) / 60);
-    let s = totalSeconds % 60;
-
-    document.getElementById("browserTimer").textContent =
-      `${padZero(h)}:${padZero(m)}:${padZero(s)}`;
-
-    totalSeconds--;
-  }, 1000);
-}
-
-function startTimerFromSelection() {
-  const hours = parseInt(document.querySelector('[name="hours"]').value);
-  const minutes = parseInt(document.querySelector('[name="minutes"]').value);
-  const seconds = parseInt(document.querySelector('[name="seconds"]').value);
-
-  startLocalCountdown(hours, minutes, seconds);
-}
-</script> -->
+            <button type="submit" class="btn btn-outline-light">Submit</button>
+        </div>
+        </div>
+    </form>
+</div>
 </body>
+<script>
+    // navbar hover effect
+document.addEventListener("DOMContentLoaded", () => {
+  const menu = document.querySelector('.menu-bar');
+  const items = document.querySelectorAll('.menu-bar li');
+  const hoverBg = document.querySelector('.hover-bg');
+
+  items.forEach(item => {
+    item.addEventListener('mouseenter', () => {
+      const rect = item.getBoundingClientRect();
+      const parentRect = menu.getBoundingClientRect();
+
+      hoverBg.style.width = `${rect.width}px`;
+      hoverBg.style.left = `${rect.left - parentRect.left}px`;
+      hoverBg.style.opacity = '1';
+      hoverBg.style.transform = 'scale(1.08)';
+    });
+
+    item.addEventListener('mouseleave', () => {
+      hoverBg.style.transform = 'scale(1)';
+    });
+  });
+
+  menu.addEventListener('mouseleave', () => {
+    hoverBg.style.opacity = '0';
+    hoverBg.style.transform = 'scale(1)';
+  });
+});
+</script>
+
+
 </html>

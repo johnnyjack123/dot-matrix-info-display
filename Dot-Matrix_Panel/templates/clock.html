@@ -33,6 +33,34 @@
         // Starte das Update sofort und dann alle 10 Sekunden
         updateTime();
         setInterval(updateTime, 10000); // 10.000 ms = 10 Sekunden
+
+        // Navbar hover effect
+        document.addEventListener("DOMContentLoaded", () => {
+  const menu = document.querySelector('.menu-bar');
+  const items = document.querySelectorAll('.menu-bar li');
+  const hoverBg = document.querySelector('.hover-bg');
+
+  items.forEach(item => {
+    item.addEventListener('mouseenter', () => {
+      const rect = item.getBoundingClientRect();
+      const parentRect = menu.getBoundingClientRect();
+
+      hoverBg.style.width = `${rect.width}px`;
+      hoverBg.style.left = `${rect.left - parentRect.left}px`;
+      hoverBg.style.opacity = '1';
+      hoverBg.style.transform = 'scale(1.08)';
+    });
+
+    item.addEventListener('mouseleave', () => {
+      hoverBg.style.transform = 'scale(1)';
+    });
+  });
+
+  menu.addEventListener('mouseleave', () => {
+    hoverBg.style.opacity = '0';
+    hoverBg.style.transform = 'scale(1)';
+  });
+});
     </script>
 </body>
 </html>

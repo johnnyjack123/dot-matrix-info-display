@@ -765,7 +765,7 @@ if __name__ == '__main__':
 
     if app_window == "App":
         # Starte Webview (blockierend!)
-        webview.create_window("Arduino Zeitsteuerung", "http://127.0.0.1:5000")
+        webview.create_window("Dot Matrix Panel Client", "http://127.0.0.1:5000")
         webview.start()
     else:
         # App soll im Browser laufen – blockiere Hauptthread nicht sofort
