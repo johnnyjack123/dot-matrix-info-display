@@ -56,7 +56,7 @@ body, html {
 /* ------------------ Fonts ------------------ */
 .anzeige {
     font-family: '5by7', sans-serif;
-    font-size: 4vw;
+    font-size: 8vw;
     color: #ff4400;
     text-align: center;
     line-height: 0.9; /* weniger als normal, engerer Abstand */

@@ -17,7 +17,9 @@
         </div>
 
         {% if connection_state %}
-        <p>You have to connect your ESP with the latest firmware to this computer. Afterward press Connect</p>
+        <p class="form-label">You have to connect your ESP to this computer. The ESP needs to be flashed with the latest Dot-Matrix_Main_Arduino.ino file via the
+            <a href="https://www.arduino.cc/en/software/">Arduino IDE</a>
+            . Afterward press Connect</p>
         <a href="/initial_connect" class="btn btn-outline-light">Connect</a>
         {% else %}
         <a href="/dashboard" class="btn btn-outline-light">Skip connection</a>

@@ -79,7 +79,7 @@ port = 1234
 
 connection = True #State variable to check if esp is connected or not
 
-@app.route('/initial_connect')
+@app.route('/initial_connect', methods=["GET"])
 def initial_connect():
     with open("userdata.json", "r", encoding="utf-8") as file:
         data = json.load(file)
@@ -107,8 +107,9 @@ def initial_connect():
 
         with open("userdata.json", "w", encoding="utf-8") as file:
             json.dump(data, file, ensure_ascii=False, indent=4)
+            text = "Connected successfully. Please restart the program now."
 
-    return redirect(url_for("connect"))  # oder render_template(...)
+    return render_template("success.html", text=text)
 
 @app.route('/connect', methods=["POST", "GET"])
 def connect():
@@ -252,7 +253,7 @@ def api_temperature():
 
 @app.route('/api/tasks')
 def api_tasks():
-    return jsonify(note_collection)
+    return jsonify(task_collection)
 
 @app.route('/api/music')
 def api_music():

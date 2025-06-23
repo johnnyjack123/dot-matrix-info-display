@@ -213,13 +213,14 @@ void timer(String time) {
 
   } else {
     totalSeconds = 0;
+    state = 1;
   }
   P.displayClear();
 
   if (state == 1 || totalSeconds == 0) {
     alert();
-    P.displayZoneText(0, "Timer", PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
-    P.displayZoneText(1, "Ended", PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
+    P.displayZoneText(1, "Timer", PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
+    P.displayZoneText(0, "Ended", PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
     P.displayAnimate();
     delay(10);
     parts[0] = "";
@@ -228,16 +229,6 @@ void timer(String time) {
     value = "";
     input = "";
   }
-  /*else {
-    alert();
-    P.displayZoneText(1, "Stop", PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
-    P.displayAnimate();
-    delay(10);
-    parts[0] = "";
-    parts[1] = "";
-    nextMode = "";
-    value = "";
-  }*/
 }
 
 void clock(String time) {
@@ -246,7 +237,6 @@ void clock(String time) {
   String currentTime = time;
   bool x = 1;
   while (x) {
-    //Serial.print("While Schleife");
     int firstSlash = currentTime.indexOf('/');
     int secondSlash = currentTime.indexOf('/', firstSlash + 1);
     int thirdSlash = currentTime.indexOf("/", secondSlash + 1);
