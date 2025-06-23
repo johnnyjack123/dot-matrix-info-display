@@ -50,8 +50,8 @@ String inputBuffer = "";
 
 String transmissionMode = "WIFI";
 
-const char* ssid = "Transfunk";
-const char* password = "25JhJmXmssAnL12\\o/";
+const char* ssid = "change_me"; // Enter your WIFIs network name
+const char* password = "change_me"; // Enter your WIFIs network password
 
 WiFiServer server(1234);  // Port wählen
 WiFiClient client;
