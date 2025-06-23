@@ -14,7 +14,7 @@
 
     <!-- Hauptformular NUR für neue Einträge -->
     <div class="form-settings-container">
-    <form method="POST" action="/notes">
+    <form method="POST" action="/tasks">
 
             <div class="mb-3">
                 <label for="task" class="form-label">Task</label>
@@ -33,7 +33,7 @@
             <div style="flex: 1">{{ task }}</div>
             <div class="d-flex align-items-center" style="gap: 1rem; white-space: nowrap;">
                 <span>{{ time }}</span>
-                <form method="POST" action="/notes" style="margin: 0;">
+                <form method="POST" action="/tasks" style="margin: 0;">
                     <input type="hidden" name="delete" value="{{ time }}">
                     <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                 </form>
@@ -45,7 +45,7 @@
 </div>
 <script>
     function updateNoteList() {
-        fetch('/api/notes')
+        fetch('/api/tasks')
             .then(response => response.json())
             .then(data => {
                 const taskList = document.getElementById('task-list');

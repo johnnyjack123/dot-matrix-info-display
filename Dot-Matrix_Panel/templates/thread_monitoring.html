@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -8,8 +8,8 @@
 <link href="/static/style.css" rel="stylesheet">
 </head>
 <body>
-
-   <div class="form-container">
+<div class="form-container-settings-wrapper">
+   <div class="form-settings-container">
         <h2 class="header" style="text-align: center;">Thread Monitoring</h2>
 
 
@@ -39,7 +39,7 @@
 </ul>
        <a href="/settings" class="btn btn-outline-light">Back to settings</a>
     </div>
-
+</div>
 <script>
 function updateThreadLists() {
     fetch('/api/threads')

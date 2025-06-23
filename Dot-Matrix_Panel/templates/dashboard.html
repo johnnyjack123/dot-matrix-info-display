@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Landing</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
+</head>
+<body>
+
+<div>
+            <h1 class="header" style="margin-top: 5rem">Hallo {{ username }} 👋</h1>
+        </div>
+
+<nav class="menu">
+    <input class="menu-toggler" type="checkbox">
+    <label for="menu-toggler"></label>
+  <ul>
+    <li class="menu-item">
+      <a class="d-flex justify-content-center align-items-center"  href="/music"> <img src="/static/icons/note-349441.svg" alt="Music" style="width:60px; height:60px;"></a>
+    </li>
+    <li class="menu-item">
+      <a class="d-flex justify-content-center align-items-center" style="transform: rotate(-51.2deg);" href="/tasks"> <img src="/static/icons/list-6229425.svg" alt="Task" style="width:80px; height:80px;"></a>
+    </li>
+    <li class="menu-item">
+      <a class="d-flex justify-content-center align-items-center" style="transform: rotate(-102.86deg);" href="/simhub"> <img src="/static/icons/nintendo-296445.svg" alt="SimHub" style="width:60px; height:60px;"></a>
+    </li>
+    <li class="menu-item">
+      <a class="d-flex justify-content-center align-items-center" style="transform: rotate(205.72deg);" href="/weather"> <img src="/static/icons/cloud-160249.svg" alt="Weather" style="width:60px; height:60px;"></a>
+    </li>
+    <li class="menu-item">
+      <a class="d-flex justify-content-center align-items-center" style="transform: rotate(-205.72deg);" href="/clock"> <img src="/static/icons/clock.svg" alt="Clock" style="width:45px; height:45px;"></a>
+    </li>
+    <li class="menu-item">
+      <a class="fas fa-glass-cheers" href="/settings_page"> <img src="/static/icons/gear-1119298.svg" alt="Settings" style="width:112px; height:95px;"></a>
+    </li>
+      <li class="menu-item">
+      <a class="d-flex justify-content-center align-items-center" style="transform: rotate(-308.58deg);" href="/timer"> <img src="/static/icons/timer.png" alt="Timer" style="width:100px; height:100px;"></a>
+    </li>
+  </ul>
+    </nav>
+</body>
+</html>

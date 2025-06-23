@@ -43,7 +43,7 @@ clock_thread = None
 music_thread_started = False
 weather_thread_started = False
 timer_thread = False
-notes_thread = False
+task_thread = False
 send_thread = False
 monitoring_thread = False
 rounded_temperature = ""
@@ -58,7 +58,7 @@ seconds = ""
 
 note = ""
 remind_time = ""
-note_collection = {}
+task_collection = {}
 
 messages = []
 
@@ -143,6 +143,9 @@ def check_connection():
             start_thread_monitoring()
             return jsonify({"connected": True})
     except Exception as e:
+        start_get_time()
+        start_send()
+        start_thread_monitoring()
         return jsonify({"connected": False})
 
 
@@ -156,7 +159,7 @@ def dashboard():
         if data.get("userdata") and any("username" in user for user in data["userdata"]):
             userdata = data.get("userdata", [])
             username = userdata[-1]["username"]
-            return render_template('index.html', username=username)
+            return render_template('dashboard.html', username=username)
         else:
             return render_template("landing.html")
 
@@ -206,25 +209,25 @@ def music():
     print("Title: " + title)
     return render_template('music.html', title=title)
 
-@app.route('/notes', methods=['GET', 'POST'])
-def display_notes():
-    global note, remind_time, notes_thread, note_collection
+@app.route('/tasks', methods=['GET', 'POST'])
+def tasks():
+    global note, remind_time, task_thread, task_collection
     if request.method == 'POST':
         if request.method == 'POST':
             if 'delete' in request.form:
                 delete_time = request.form['delete']
-                note_collection.pop(delete_time, None)
-                print(note_collection)
+                task_collection.pop(delete_time, None)
+                print(task_collection)
             else:
                 note = request.form['task']
                 remind_time = str(request.form['remind_time'])
-                if remind_time in note_collection:
+                if remind_time in task_collection:
                     return render_template('internal_server_error.html', error="Its not possible to create two tasks with the same time")
-                note_collection[remind_time] = note
-                notes_thread = False
+                task_collection[remind_time] = note
+                task_thread = False
                 print(type(remind_time), remind_time)
-                start_notes()
-    return render_template('notes.html', tasks=note_collection)
+                start_tasks()
+    return render_template('tasks.html', tasks=task_collection)
 
 @app.route('/simhub')
 def simhub():
@@ -247,8 +250,8 @@ def api_temperature():
         'temperature': str(rounded_temperature) + "°C"
     })
 
-@app.route('/api/notes')
-def api_notes():
+@app.route('/api/tasks')
+def api_tasks():
     return jsonify(note_collection)
 
 @app.route('/api/music')
@@ -311,7 +314,7 @@ def landing():
 
 @app.route('/manage_threads', methods=["POST", "GET"])
 def manage_threads():
-    global weather_thread_started, timer_thread, notes_thread, send_thread, monitoring_thread, running_threads, sleeping_threads
+    global weather_thread_started, timer_thread, task_thread, send_thread, monitoring_thread, running_threads, sleeping_threads
 
     return render_template("thread_monitoring.html", running_threads=running_threads, sleeping_threads=sleeping_threads)
 
@@ -418,23 +421,23 @@ def timer():
                     minutes = 59
                     hours = int(hours) - 1
 
-def start_notes():
-    global notes_thread
-    if not notes_thread:
-        notes_thread = True
-        thread = threading.Thread(target=notes, daemon=True)
+def start_tasks():
+    global task_thread
+    if not task_thread:
+        task_thread = True
+        thread = threading.Thread(target=tasks, daemon=True)
         thread.start()
 
-def stop_notes():
-    global notes_thread
-    notes_thread = False
+def stop_tasks():
+    global task_thread
+    task_thread = False
 
-def notes():
-    global now, notes_thread, note_collection
+def tasks():
+    global now, task_thread, task_collection
     while True:
-        if len(note_collection) > 0:
+        if len(task_collection) > 0:
             # Über eine KOPIE des Dictionaries iterieren:
-            for task_time, task in list(note_collection.items()):
+            for task_time, task in list(task_collection.items()):
                 current_time = f"{now[3]:02}:{now[4]:02}"
                 if task_time == current_time:
                     time.sleep(0.2)
@@ -445,12 +448,11 @@ def notes():
                     #print(message)
                     #print("Note sent")
                     #print(note_collection)
-                    del note_collection[task_time]  # Sicheres Löschen
+                    del task_collection[task_time]  # Sicheres Löschen
                     time.sleep(1)
 
-                    if not len(note_collection) > 0:
-                        #notes_thread = True
-                        stop_notes()
+                    if not len(task_collection) > 0:
+                        stop_tasks()
                         stop_music()
                         stop_weather()
                         stop_clock()
@@ -715,13 +717,13 @@ def start_thread_monitoring():
         thread.start()
 
 def thread_monitoring():
-    global weather_thread_started, timer_thread, notes_thread, send_thread, monitoring_thread, running_threads, sleeping_threads
+    global weather_thread_started, timer_thread, task_thread, send_thread, monitoring_thread, running_threads, sleeping_threads
     while True:
         running_threads = []
         sleeping_threads = []
         threads = [{"name": "Weather", "value": weather_thread_started},
                    {"name": "Timer", "value": timer_thread},
-                   {"name": "Notes", "value": notes_thread},
+                   {"name": "Tasks", "value": task_thread},
                    {"name": "Send", "value": send_thread},
                    {"name": "Thread Monitoring", "value": monitoring_thread},
                    {"name": "Music", "value": music_thread_started},
@@ -743,6 +745,8 @@ def find_esp_port():
 
 def start_flask():
     app.run()
+
+#start_thread_monitoring()
 
 # Start
 if __name__ == '__main__':

@@ -9,7 +9,7 @@ body, html {
             height: 100%;
             margin: 0;
             font-family: Arial, sans-serif;
-            background: url("colorful-abstract-swirl-4k-c4-3840x2160.jpg") no-repeat center center fixed;
+            background: url("circles-7345110.jpg") no-repeat center center fixed;
             background-size: cover;
         }
 
@@ -56,7 +56,7 @@ body, html {
 /* ------------------ Fonts ------------------ */
 .anzeige {
     font-family: '5by7', sans-serif;
-    font-size: 12vw;
+    font-size: 4vw;
     color: #ff4400;
     text-align: center;
     line-height: 0.9; /* weniger als normal, engerer Abstand */
@@ -109,8 +109,9 @@ body, html {
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
             padding: 1rem;
-            width: 100%;
-            max-width: 500px;
+            display: inline-block;       /* <-- passt sich Inhalt an */
+            max-width: 90vw;
+            word-wrap: break-word;
             margin-top: 2rem;
         }
 
@@ -190,7 +191,7 @@ input.form-control:focus {
 
 /* ------------------ NAVBAR ------------------ */
 .navbar {
-    background-color: #1f1f1f;
+    background: rgba(255, 255, 255, 0.12);
     border-bottom: 2px solid #2c2c2c;
     padding: 1rem;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
@@ -374,3 +375,243 @@ input:checked + .slider
   box-shadow: 0 0 0 2px red, 0 0 8px red;
 }
 
+/* ------------------- Task list ----------------------- */
+#task-list {
+    max-width: 600px;           /* Breite begrenzen */
+    margin: 2rem auto;          /* zentrieren + Abstand oben/unten */
+    padding: 0;
+    border-radius: 15px;
+    background: rgba(30, 30, 30, 0.4); /* dunkles transparentes Glas */
+    backdrop-filter: blur(12px);       /* Hintergrund unscharf */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+    list-style: none;           /* keine Bulletpoints */
+    font-family: '5by7', sans-serif; /* gleiche Schriftart */
+    font-size: 1.2rem;
+    color: #f70000;             /* passend zur Farbe aus .anzeige */
+}
+
+#task-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: default;
+    transition: background-color 0.3s ease;
+    color: white;
+}
+
+#task-list li:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ff4d4d;
+    box-shadow: 0 0 10px #ff4d4d;
+    transform: scale(1.02);
+    border-radius: 12px;
+}
+
+#task-list li div:first-child {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#task-list li div:last-child {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    white-space: nowrap;
+}
+
+#task-list li span {
+    font-weight: bold;
+    color: #ff6666;
+}
+
+#task-list button.btn-danger {
+    background-color: #f70000;
+    border-color: #f70000;
+    font-weight: bold;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#task-list button.btn-danger:hover {
+    background-color: #ff4d4d;
+    box-shadow: 0 0 8px #ff4d4d;
+}
+
+/* ------------------------ Spinner ----------------------- */
+.spinner-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ffffff30;
+  border-top: 4px solid #00ffcc;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ------------------------ DASHBOARD ------------------------- */
+
+.menu-toggler {
+  position: absolute;
+  display: block;
+  top:0;
+  bottom:0;
+  right:0;
+  left:0;
+  margin:auto;
+  width:40px;
+  height:40px;
+  z-index:2;
+  opacity:0;
+  cursor:pointer;
+}
+.menu-toggler:hover + label,
+.menu-toggler:hover + label:before,
+.menu-toggler:hover + label:after,{
+  background: white;
+}
+.menu-toggler:checked + label {
+  background: transparent;
+}
+.menu-toggler:checked + label:before,
+.menu-toggler:checked + label:after,{
+  top:0;
+  width:40px;
+  transform-origin: 50% 50%;
+}
+.menu-toggler:checked + label:before {
+  transform: rotate(45deg) translateY(-15px) translateX(-15px);
+}
+.menu-toggler:checked + label:after {
+  transform: rotate(-45deg);
+}
+.menu-toggler:checked ~ ul .menu-item {
+  opacity: 1;
+}
+.menu-toggler:checked ~ ul .menu-item:nth-child(1) {
+  transform: rotate(0deg) translate(-110px);
+}
+.menu-toggler:checked ~ ul .menu-item:nth-child(2) {
+  transform: rotate(60deg) translateX(-110px);
+}
+.menu-toggler:checked ~ ul .menu-item:nth-child(3) {
+  transform: rotate(120deg) translateX(-110px);
+}
+.menu-toggler:checked ~ ul .menu-item:nth-child(4) {
+  transform: rotate(180deg) translateX(-110px);
+}
+.menu-toggler:checked ~ ul .menu-item:nth-child(5) {
+  transform: rotate(240deg) translateX(-110px);
+}
+.menu-toggler:checked ~ ul .menu-item:nth-child(6) {
+  transform: rotate(300deg) translateX(-110px);
+}
+.menu-toggler:checked ~ ul .menu-item a {
+  pointer-events:auto;
+}
+.menu-toggler + label {
+  width: 40px;
+  height: 5px;
+  display: block;
+  z-index: 1;
+  border-radius: 2.5px;
+  background: rgba(230, 239, 250, 0.9);
+  transition: transform 0.5s top 0.5s;
+  position: absolute;
+  display: block;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+.menu-toggler + label:before,
+.menu-toggler + label:after {
+  width: 40px;
+  height: 5px;
+  display: block;
+  z-index: 1;
+  border-radius: 2.5px;
+  background: rgba(255, 255, 255, 0.7);
+  transition: transform 0.5s top 0.5s;
+  content: "";
+  position: absolute;
+  display: block;
+  left: 0;
+}
+.menu-toggler + label:before {
+  top: 10px;
+}
+.menu-toggler + label:after {
+  top: -10px;
+}
+.menu-toggler:checked ~ ul .menu-item:nth-child(1) {
+  transform: rotate(0deg) translateX(-110px);
+}
+.menu-toggler:checked ~ ul .menu-item:nth-child(2) {
+  transform: rotate(51.2deg) translateX(-110px);
+}
+.menu-toggler:checked ~ ul .menu-item:nth-child(3) {
+  transform: rotate(102.86deg) translateX(-110px);
+}
+.menu-toggler:checked ~ ul .menu-item:nth-child(4) {
+  transform: rotate(154.29deg) translateX(-110px);
+}
+.menu-toggler:checked ~ ul .menu-item:nth-child(5) {
+  transform: rotate(205.72deg) translateX(-110px);
+}
+.menu-toggler:checked ~ ul .menu-item:nth-child(6) {
+  transform: rotate(257.15deg) translateX(-110px);
+}
+.menu-toggler:checked ~ ul .menu-item:nth-child(7) {
+  transform: rotate(308.58deg) translateX(-110px);
+}
+.menu-item {
+  position: absolute;
+  display: block;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 80px;
+  height: 80px;
+  opacity: 0;
+  transition: 0.5s;
+}
+.menu-item a {
+  display: block;
+  width: inherit;
+  height: inherit;
+  line-height: 80px;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(230, 230, 250, 0.7);
+  border-radius: 50%;
+  text-align: center;
+  text-decoration: none;
+  font-size: 40px;
+  pointer-events: none;
+  transition: 0.2s;
+}
+.menu-item a:hover {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+  color: white;
+  background: rgba(255, 255, 255, 0.3);
+  font-size: 44.44px
+}
