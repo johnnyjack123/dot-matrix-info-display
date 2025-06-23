@@ -2,6 +2,7 @@
 
 This program is an application to display easily different things on a Dot-Matrix-Panel like the current weather or the actual playing songtitle. 
 The two displays are controlled by an ESP (in my case ESP32, but it should also work with an ESP8266) which is connected via WIFI to a PC running this program to switch between different modes.
+
 ---
 # Features
 Possible things are possible to do with this tool:
