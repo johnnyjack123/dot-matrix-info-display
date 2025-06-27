@@ -4,6 +4,7 @@ import zipfile
 import io
 import os
 import shutil
+import sys
 
 def check_internet_connection(url="https://www.google.com", timeout=5):
     try:
@@ -14,7 +15,7 @@ def check_internet_connection(url="https://www.google.com", timeout=5):
 
 def update():
     print("Updating...")
-    branch = "Thread-Monitoring"
+    branch = "Master"
     repo = "johnnyjack123/dot-matrix-info-display"
     folder_to_extract = "Dot-Matrix_Panel"
     target_folder = "./Dot-Matrix_Panel"
@@ -62,10 +63,10 @@ def update():
     launch_app()
 
 def launch_app():
-    subprocess.run([r"C:\Users\jonat\Documents\Programmieren\Dot-Matrix-Panel\venv\Scripts\python.exe", "Dot-Matrix_Panel/Dot-Matrix_Main.py"])
+    subprocess.run([sys.executable, "Dot-Matrix_Panel/Dot-Matrix_Main.py"])
 
 def check_for_updates():
-    url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/Thread-Monitoring/Dot-Matrix_Panel/version.txt"
+    url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/master/Dot-Matrix_Panel/version.txt"
     path_version = r"tmp\newest_version.txt"
     folder = os.path.dirname(path_version)
     if not os.path.exists(folder):
