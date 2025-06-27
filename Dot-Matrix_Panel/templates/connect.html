@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Connect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="form-container-connect-wrapper">
+    <div class="form-settings-container">
+        <h1 class="header_small">Waiting for connection to ESP...</h1>
+
+        <div class="spinner-wrapper">
+            <div class="spinner"></div>
+        </div>
+
+        {% if connection_state %}
+        <p class="form-label">You have to connect your ESP to this computer. The ESP needs to be flashed with the latest Dot-Matrix_Main_Arduino.ino file via the
+            <a href="https://www.arduino.cc/en/software/">Arduino IDE</a>
+            . Afterward press Connect</p>
+        <a href="/initial_connect" class="btn btn-outline-light">Connect</a>
+        {% else %}
+        <a href="/dashboard" class="btn btn-outline-light">Skip connection</a>
+        {% endif %}
+    </div>
+</div>
+<script>
+    function checkConnection() {
+        fetch('/check_connection')
+            .then(response => response.json())
+            .then(data => {
+                if (data.connected) {
+                    window.location.href = "/dashboard";  // Zielroute
+                } else {
+                    setTimeout(checkConnection, 1000); // Wiederholen nach 1s
+                }
+            })
+            .catch(error => {
+                console.error("Fehler bei der Verbindung:", error);
+                setTimeout(checkConnection, 1000); // Wiederholen auch bei Fehler
+            });
+    }
+
+    // Starte sofort
+    checkConnection();
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+pyserial
+flask
+pywebview
+requests
+Unidecode
+winrt-windows.media

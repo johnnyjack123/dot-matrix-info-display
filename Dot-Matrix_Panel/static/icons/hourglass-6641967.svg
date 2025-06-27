@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1000"
+   height="1000"
+   viewBox="0 0 264.58332 264.58334"
+   version="1.1"
+   id="svg5"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs2" />
+  <metadata
+     id="metadata856">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Inspire Studio</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+        <dc:description>Thank you for using this artwork. Feel free to visit our page https://www.pinterest.com.au/inspirestudiobox for more designs. We wish you have a wonderful day, everyday. Amitabha</dc:description>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <rect
+     style="fill:#f7f7f7;fill-opacity:1;stroke:none;stroke-width:10.5833;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+     id="rect46883"
+     width="264.58334"
+     height="264.58334"
+     x="0"
+     y="0" />
+  <g
+     id="g46944"
+     transform="translate(-275.16666,1.350586e-5)">
+    <path
+       style="fill:none;stroke:#4d4d4d;stroke-width:9.26042;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 360.80497,70.77603 h 93.30676"
+       id="path46894" />
+    <path
+       style="fill:none;stroke:#4d4d4d;stroke-width:9.26042;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 360.80497,193.80728 h 93.30676"
+       id="path46896" />
+    <path
+       id="path46898"
+       style="fill:none;stroke:#4d4d4d;stroke-width:7.9375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       d="m 366.94445,70.77603 v 8.92473 c 0,21.56035 12.37375,39.92544 30.00635,47.54414 1.52068,0.65705 2.79062,2.44281 2.79062,4.09966 l 0,1.8942 c 0,1.65685 -1.26994,3.44261 -2.79062,4.09966 -17.6326,7.6187 -30.00635,25.98378 -30.00635,47.54413 v 8.92473 h 40.5139 40.51391 v -8.92473 c 0,-21.56044 -12.37365,-39.9255 -30.00635,-47.54414 -1.52068,-0.65705 -2.79062,-2.4428 -2.79062,-4.09965 v -1.8942 c 0,-1.65685 1.26994,-3.4426 2.79063,-4.09965 17.63269,-7.61865 30.00634,-25.9837 30.00634,-47.54415 v -8.92473 h -40.51391 z" />
+    <path
+       id="path46900"
+       style="fill:#0573e1;fill-opacity:1;stroke:none;stroke-width:10.5833;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke"
+       d="m 377.69273,93.337253 c 3.9747,14.583607 15.49141,25.653137 29.76562,28.092597 14.27421,-2.43946 25.79092,-13.50899 29.76563,-28.092597" />
+    <path
+       id="path46902"
+       style="fill:#0573e1;fill-opacity:1;stroke:none;stroke-width:10.5833;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke"
+       d="m 375.70835,184.85848 c 0.54117,-17.65316 18.04987,-26.40753 31.75,-26.40753 13.70013,0 31.75,10.68961 31.75,26.40753 h -31.75 z" />
+    <ellipse
+       style="fill:#0573e1;fill-opacity:1;stroke:none;stroke-width:7.9375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       id="circle46904"
+       cx="407.45834"
+       cy="143.22781"
+       rx="2.7360616"
+       ry="2.7340276" />
+    <ellipse
+       style="fill:#0573e1;fill-opacity:1;stroke:none;stroke-width:7.9375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       id="circle46906"
+       cx="407.45834"
+       cy="153.10565"
+       rx="2.7360616"
+       ry="2.7340276" />
+  </g>
+</svg>

@@ -1,0 +1,77 @@
+    <!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Tread Monitoring</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/static/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="form-container-settings-wrapper">
+   <div class="form-settings-container">
+        <h2 class="header" style="text-align: center;">Thread Monitoring</h2>
+
+
+
+<hr class="my-4">
+<!-- Running Threads -->
+    <h1 class="header_small" style="text-align: center;">Running Threads</h1>
+<ul id="running-list" class="list-group container">
+
+    {% for running_thread in running_threads %}
+    <li class="list-group-item d-flex justify-content-between align-items-center bg-dark text-light">
+        <p> {{ running_thread }} </p>
+        <span class="badge bg-info text-dark mx-1" >Running</span>
+    </li>
+    {% endfor %}
+</ul>
+<hr class="my-4">
+<!-- Running Threads -->
+    <h1 class="header_small" style="text-align: center;">Sleeping Threads</h1>
+<ul id="sleeping-list" class="list-group container">
+    {% for sleeping_thread in sleeping_threads %}
+    <li class="list-group-item d-flex justify-content-between align-items-center bg-dark text-light">
+        <p> {{ sleeping_thread }} </p>
+        <span class="badge bg-warning text-dark mx-1" >Sleeping</span>
+    </li>
+    {% endfor %}
+</ul>
+       <a href="/settings" class="btn btn-outline-light">Back to settings</a>
+    </div>
+</div>
+<script>
+function updateThreadLists() {
+    fetch('/api/threads')
+        .then(response => response.json())
+        .then(data => {
+            const runningList = document.getElementById('running-list');
+            const sleepingList = document.getElementById('sleeping-list');
+
+            runningList.innerHTML = '';
+            sleepingList.innerHTML = '';
+
+            data.running_threads.forEach(thread => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center bg-dark text-light';
+                li.innerHTML = `<p>${thread}</p><span class="badge bg-info text-dark mx-1">Running</span>`;
+                runningList.appendChild(li);
+            });
+
+            data.sleeping_threads.forEach(thread => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center bg-dark text-light';
+                li.innerHTML = `<p>${thread}</p><span class="badge bg-warning text-dark mx-1">Sleeping</span>`;
+                sleepingList.appendChild(li);
+            });
+        });
+}
+
+// Starte das Update sofort und dann alle 1 Sekunden
+updateThreadLists();
+setInterval(updateThreadLists, 1000);
+</script>
+
+</body>
+
+</html>
