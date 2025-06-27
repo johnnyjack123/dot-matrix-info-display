@@ -18,7 +18,7 @@ With this tool, you can:
   
 # Tutorial  
   
-# Requirements  
+## Requirements  
 1. **Dot Matrix Panel**  
     (I used two of these: [https://www.amazon.de/AZDelivery-MAX7219-Matrix-Anzeigemodul-Arduino/dp/B079HVW652/ref=sr_1_1](https://www.amazon.de/AZDelivery-MAX7219-Matrix-Anzeigemodul-Arduino/dp/B079HVW652/ref=sr_1_1))
     
