@@ -741,13 +741,11 @@ def find_esp_port():
     for port in ports:
         beschreibung = port.description.lower()
         if "ch340" in beschreibung or "silicon" in beschreibung or "cp210" in beschreibung or "usb serial" in beschreibung or "esp" in beschreibung or "arduino" in beschreibung:
-            return port.device  # z. B. 'COM4'
+            return port.device
     return None
 
 def start_flask():
     app.run()
-
-#start_thread_monitoring()
 
 # Start
 if __name__ == '__main__':
