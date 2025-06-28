@@ -2,7 +2,6 @@ import serial
 from datetime import datetime
 import time
 
-#from Demos.win32ts_logoff_disconnected import username
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import webview
 import threading
@@ -756,12 +755,17 @@ if __name__ == '__main__':
             app_window = "App"
     else:
         # Datei laden
-        with open("userdata.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
+        try:
+            with open("userdata.json", "r", encoding="utf-8") as file:
+                data = json.load(file)
 
-        # Nimm nur den ersten Benutzer-Eintrag
-        user = data["userdata"][0]
-        app_window = user.get("open", "App")  # Standardwert falls nicht gesetzt
+            # Nimm nur den ersten Benutzer-Eintrag
+            user = data["userdata"][0]
+            app_window = user.get("open", "App")  # Standardwert falls nicht gesetzt
+        except Exception as e:
+            with open("userdata.json", "w", encoding="utf-8") as file:
+                json.dump({"userdata": []}, file, ensure_ascii=False, indent=4)
+                app_window = "App"
 
     # Starte immer den Flask-Server im Hintergrund
     threading.Thread(target=start_flask, daemon=True).start()

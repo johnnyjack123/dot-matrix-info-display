@@ -4,3 +4,4 @@ pywebview
 requests
 Unidecode
 winrt-windows.media.control
+winrt-windows.foundation
