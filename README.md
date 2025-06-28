@@ -66,6 +66,7 @@ With this tool, you can:
 ## Install the Python Program
 
 1. Download and install the latest version of Python from the official website: [https://www.python.org/downloads/](https://www.python.org/downloads/)
+2. Make sure to have visual-cpp-build-tools installed (https://visualstudio.microsoft.com/visual-cpp-build-tools/). Otherwise there is probably an error by the library installation.
     
 2.  Locate the file `launcher.bat` in the `dot-matrix-info-display-master` folder and open it by double-clicking it.
     
