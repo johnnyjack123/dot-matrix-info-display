@@ -69,7 +69,9 @@ With this tool, you can:
     
 2.  Locate the file `launcher.bat` in the `dot-matrix-info-display-master` folder and open it by double-clicking it.
     
-3.  The script will automatically set up and activate a virtual environment and install all necessary libraries. After that, the program will start. I recommend always launching the program via the `launcher.bat` file, as it’s the easiest and most reliable way to start it.
+3. A warning window may pop up. You need to allow Windows to execute the script. If you don’t want to allow it, you can also open the file in a text editor and manually copy the commands into your command line.
+4. If you want to use a cool pixel-style font, install the font located at dot-matrix-info-display/Dot-Matrix_Panel/templates/5by7.ttf by double-clicking the file.
+5. The script will automatically set up and activate a virtual environment and install all necessary libraries. After that, the program will start. I recommend always launching the program via the `launcher.bat` file, as it’s the easiest and most reliable way to start it.
   
 ---  
 ## Set up the program  
