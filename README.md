@@ -67,17 +67,9 @@ With this tool, you can:
 
 1. Download and install the latest version of Python from the official website: [https://www.python.org/downloads/](https://www.python.org/downloads/)
     
-2. Open the command line and navigate to the `Dot-Matrix-Panel/Dot-Matrix_Panel` folder of this project (where the `requirements.txt` file is located).
+2.  Locate the file `launcher.bat` in the `Dot-Matrix-Panel` folder and open it by double-clicking it.
     
-3. Run the following command to install all required libraries:
-    `pip install -r requirements.txt`
-    
-4. Then navigate to the `Dot-Matrix_Panel` folder, where the `Launcher.py` file is located.
-    
-5. Start the program with:
-    `python Launcher.py`
-    
-6. That's it — you're ready to set up the program.
+3.  The script will automatically set up and activate a virtual environment and install all necessary libraries. After that, the program will start. I recommend always launching the program via the `launcher.bat` file, as it’s the easiest and most reliable way to start it.
   
 ---  
 ## Set up the program  
