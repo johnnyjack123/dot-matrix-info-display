@@ -45,7 +45,7 @@ With this tool, you can:
 3. Download and install the Arduino IDE from the official website: [https://www.arduino.cc/en/software/](https://www.arduino.cc/en/software/)
     
 4. The ESP code is located in:  
-    `dot-matrix-info-display/Dot-Matrix_Panel/Dot-Matrix_Main_ESP/Dot-Matrix_Main_ESP.ino`
+    `dot-matrix-info-display-master/Dot-Matrix_Panel/Dot-Matrix_Main_ESP/Dot-Matrix_Main_ESP.ino`
     
 5. Open the `Dot-Matrix_Main_ESP.ino` file by double-clicking it.
     
@@ -58,7 +58,7 @@ With this tool, you can:
     - `MD_Parola`  
     - You can find a detailed library installation guide here:  [Library installation tutorial](https://docs.arduino.cc/software/ide-v2/tutorials/ide-v2-installing-a-library/)
         
-8. Since the ESP connects to your PC via Wi-Fi, you’ll need to enter your Wi-Fi name (SSID) and password in the ESP code. Replace the placeholder values in lines 53 and 54 in the Dot-Matrix_Main_ESP.ino file. The file is located in /Dot-Matrix-Panel/Dot-Matrix_Panel/Dot-Matrix_Main_ESP/Dot-Matrix_Main_ESP.ino
+8. Since the ESP connects to your PC via Wi-Fi, you’ll need to enter your Wi-Fi name (SSID) and password in the ESP code. Replace the placeholder values in lines 53 and 54 in the Dot-Matrix_Main_ESP.ino file. The file is located in /dot-matrix-info-display-master/Dot-Matrix_Panel/Dot-Matrix_Main_ESP/Dot-Matrix_Main_ESP.ino
     
 9. Once that’s done, you can flash the code onto your ESP.
   
@@ -67,7 +67,7 @@ With this tool, you can:
 
 1. Download and install the latest version of Python from the official website: [https://www.python.org/downloads/](https://www.python.org/downloads/)
     
-2.  Locate the file `launcher.bat` in the `Dot-Matrix-Panel` folder and open it by double-clicking it.
+2.  Locate the file `launcher.bat` in the `dot-matrix-info-display-master` folder and open it by double-clicking it.
     
 3.  The script will automatically set up and activate a virtual environment and install all necessary libraries. After that, the program will start. I recommend always launching the program via the `launcher.bat` file, as it’s the easiest and most reliable way to start it.
   
