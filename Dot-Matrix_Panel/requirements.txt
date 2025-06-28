@@ -3,4 +3,4 @@ flask
 pywebview
 requests
 Unidecode
-winrt-windows.media
+winrt-windows.media.control

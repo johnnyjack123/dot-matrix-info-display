@@ -63,7 +63,7 @@ def update():
     launch_app()
 
 def launch_app():
-    subprocess.run([sys.executable, "Dot-Matrix_Panel/Dot-Matrix_Main.py"])
+    subprocess.run(["python", "Dot-Matrix_Panel/Dot-Matrix_Main.py"], shell=True)
 
 def check_for_updates():
     url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/master/Dot-Matrix_Panel/version.txt"
