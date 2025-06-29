@@ -15,7 +15,7 @@ def check_internet_connection(url="https://www.google.com", timeout=5):
 
 def update():
     print("Updating...")
-    branch = "Master"
+    branch = "master"
     repo = "johnnyjack123/dot-matrix-info-display"
     folder_to_extract = "Dot-Matrix_Panel"
     target_folder = "./Dot-Matrix_Panel"
