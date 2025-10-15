@@ -66,30 +66,17 @@ Huge thanks to designtrickacademy for an awesome background image:
 https://pixabay.com/de/illustrations/kreise-muster-hintergrund-kunst-7345110/
 
 ### Icons
-Huge thanks to kropekk_pl for an awesome music icon:
+Source: https://lucide.dev
 
-https://pixabay.com/de/vectors/hinweis-musik-note-musiknoten-musik-349441/
+ISC License
 
-Huge thanks to OpenClipart-Vectors for an awesome hour icon:
+Copyright (c) for portions of Lucide are held by Cole Bemis 2013-2022 as part of Feather (MIT). 
+All other copyright (c) for Lucide are held by Lucide Contributors 2022.
 
-https://pixabay.com/de/vectors/symbol-wecker-uhr-zeit-wach-auf-157349/
+Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, 
+provided that the above copyright notice and this permission notice appear in all copies.
 
-Huge thanks to Clker-Free-Vector-Images for an awesome controller icon:
-
-https://pixabay.com/de/vectors/nintendo-videospiel-joystick-296445/
-
-Huge thanks to inspire-studio for an awesome hour glas icon:
-
-https://pixabay.com/de/vectors/sanduhr-herunterz%C3%A4hlen-zeit-timer-6641967/
-
-Huge thanks to IO-Images for an awesome task list icon:
-
-https://pixabay.com/de/vectors/auff%C3%BChren-fertig-pr%C3%BCfen-abgehakt-6229425/
-
-Huge thanks to Samuel1983 for an awesome settings icon:
-
-https://pixabay.com/de/vectors/ausr%C3%BCstung-mechanik-1119298/
-
-Huge thanks to OpenClipart-Vectors for an awesome cloud icon:
-
-https://pixabay.com/de/vectors/wolke-wetter-klima-kumulus-160249/
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, 
+OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.

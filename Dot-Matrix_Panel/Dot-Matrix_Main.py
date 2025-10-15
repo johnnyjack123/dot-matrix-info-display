@@ -262,6 +262,7 @@ def simhub():
 
 @app.route('/weather')
 def weather():
+    global rounded_temperature
     stop_clock()
     stop_music()
     start_weather()
@@ -526,13 +527,13 @@ def send_weather_loop():
     count = 14
     with open("userdata.json", "r", encoding="utf-8") as file:
         data = json.load(file)
-        if data.get("userdata") and any("username" in user for user in data["userdata"]):
-            userdata = data["userdata"]
-            for user in userdata:
-                if "weather_api_key" in user and "city" in user:
-                    API_KEY = user["weather_api_key"]
-                    stadt = user["city"]
-                    url = f"http://api.openweathermap.org/data/2.5/weather?q={stadt}&appid={API_KEY}&units=metric&lang=de"
+    if data.get("userdata") and any("username" in user for user in data["userdata"]):
+        userdata = data["userdata"]
+        for user in userdata:
+            if "weather_api_key" in user and "city" in user:
+                API_KEY = user["weather_api_key"]
+                stadt = user["city"]
+                url = f"http://api.openweathermap.org/data/2.5/weather?q={stadt}&appid={API_KEY}&units=metric&lang=de"
 
         while weather_thread_started:
             global now
@@ -554,12 +555,11 @@ def send_weather_loop():
                             print("New temperature set")
                         else:
                             print("Unable to get weather datas")
-                            rounded_temperature = "Weather unavailable"
+                            rounded_temperature = "Weather unavailable. Please check your API key."
                     except Exception as e:
                         print("Unable to send message")
             else:
                 time.sleep(1)
-
 
 # Background function to get the time
 def clock_loop():
