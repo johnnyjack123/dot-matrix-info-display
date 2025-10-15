@@ -28,8 +28,6 @@ int previous_millis;
 
 int kommaIndex;
 
-bool alert_state = 1;
-
 String parts[2];
 
 
@@ -40,7 +38,6 @@ String text = "Hallo Welt";
 
 String nextMode = "";
 String value = "";
-//String input = "a";
 
 String timerParts[3];
 
@@ -50,8 +47,8 @@ String inputBuffer = "";
 
 String transmissionMode = "WIFI";
 
-const char* ssid = "change_me"; // Enter your WIFIs network name
-const char* password = "change_me"; // Enter your WIFIs network password
+const char* ssid = "change me"; // Enter your WIFIs network name
+const char* password = "change me"; // Enter your WIFIs network password
 
 WiFiServer server(1234);  // Port wählen
 WiFiClient client;
@@ -73,17 +70,12 @@ void setup() {
     WiFi.begin(ssid, password);
       while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        //Serial.print(".");
       }
-      //Serial.println("\nConnected via WIFI.");
       Serial.print("IP address:");
       Serial.println(WiFi.localIP());
 
-      server.begin();
-      //Serial.println("Waiting for connection...");
-  
+      server.begin();  
   }
-
 
 void scrollText(char* p) {
   uint8_t charWidth;
@@ -103,14 +95,6 @@ void scrollText(char* p) {
   }
 }
 
-/*void coordinate() {
-  mx.clear();
-  int pixelX = x.toInt();
-  int pixelY = y.toInt();
-  mx.setPoint(pixelX, pixelY, true);
-  delay(30);
-}
-*/
 void print(String message) {
   mx.clear();
   P.print(message);
@@ -120,9 +104,6 @@ void print(String message) {
 void handleClientInput() {
   if (!client || !client.connected()) {
     client = server.available();
-    if (client) {
-      //Serial.println("Client verbunden.");
-    }
   }
   if (client) {
     //Serial.println("Client verbunden.");
@@ -135,7 +116,6 @@ void handleClientInput() {
         input = msg;
         client.println("OK");  // Antwort zurückschicken
         client.flush();                // Warten, bis alles gesendet wurde
-        //delay(100);
       }
     }
   }
@@ -157,22 +137,14 @@ void timer(String time) {
     totalSeconds = timerParts[0].toInt() * 3600 + timerParts[1].toInt() * 60 + timerParts[2].toInt();
 
     unsigned long lastUpdate = millis();
-    //P.setTextAlignment(1, PA_CENTER);
-    //int state = 0;
-    
-    //while (client.connected()) {
     while (totalSeconds >= 0) {
-      //Serial.println("In while");
       if (millis() - lastUpdate >= 1000) {
         lastUpdate = millis();
-        //state = state + 1;
         int hours = totalSeconds / 3600;
         int minutes = (totalSeconds % 3600) / 60;
         int seconds = totalSeconds % 60;
-        //mx.clear();
         char buffer[9];
         sprintf(buffer, "%02d:%02d", hours, minutes);
-        //sprintf(buffer1, "%02d", seconds);
 
         P.displayClear();
         P.displayZoneText(1, buffer, PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
@@ -180,14 +152,13 @@ void timer(String time) {
         char secondsOnly[3];
         sprintf(secondsOnly, "%02d", seconds);
 
-        // Sekunden in Zone 0 anzeigen
+        // Show seconds in zone 0
         P.displayZoneText(0, secondsOnly, PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
         P.displayAnimate();
 
         totalSeconds--;
 
         handleClientInput();
-        //Serial.println("Nach client if");
         if (input != "") {
           kommaIndex = input.indexOf(",");
 
@@ -265,7 +236,6 @@ void clock(String time) {
       lastTime = currentTime;
     }
 
-    //String input = Serial.readStringUntil('\n');
     handleClientInput();
 
     if (input != "") {
@@ -291,14 +261,11 @@ void clock(String time) {
 }
 
 void weather(String temperature) {
-  //float degrees = temperature.toFloat();
-  //float roundedDegrees = round(degrees * 10) / 10.0;
   float degrees = temperature.toFloat();
   char message[10];
   sprintf(message, "%.1fC", degrees);  // z. B. "25.5C"
   Serial.print(message);
   P.displayClear();
-  //message = temperature + "C";
   P.displayZoneText(1, message, PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
   P.displayAnimate();
   parts[0] = "";
@@ -328,7 +295,7 @@ void alert() {
   int lastUpdate = 0;
   bool state = 1;
   int count = 0;
-  while (alert_state) {
+  while (true) {
     if (millis() - lastUpdate >= 700) {
       lastUpdate = millis();
       if (state) {
@@ -341,7 +308,6 @@ void alert() {
       count = count + 1;
       if (count == 6) {
         state = 1;
-        //alert_state = 0;
         break;
       }
     }
@@ -384,21 +350,17 @@ void music(String title) {
 }
 
 void loop() {
-  //if (Serial.available())
-  //String input = Serial.readStringUntil('\n');  // Lese bis Zeilenumbruch
+  Serial.print(input);
   if (Serial.available()) {
     String request = Serial.readStringUntil('\n');
     if (request == "GET_IP") {
+      Serial.print("IP address:");
       Serial.println(WiFi.localIP());
     }
   }
   
   handleClientInput();
-  //P.displayAnimate();
-  if (input != ""){
-  Serial.print("Input: ");
-  Serial.println(input);
-  }
+
   if (input != "") {
     kommaIndex = input.indexOf(",");
 
@@ -410,7 +372,6 @@ void loop() {
     }
     input = "";
   }
-
 
   if (nextMode == "Timer") {
     nextMode = "";
@@ -440,8 +401,4 @@ void loop() {
 
   delay(10);
 
-  //}
-  //client.stop();
-  //Serial.println("Client getrennt.");
-  //}
 }

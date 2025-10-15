@@ -76,6 +76,8 @@ port = 1234
 
 connection = True #State variable to check if esp is connected or not
 
+actual_screen = ""
+
 @app.route('/initial_connect', methods=["GET"])
 def initial_connect():
     text = ""
@@ -418,7 +420,7 @@ def stop_timer():
     timer_thread = False
 
 def timer():
-    global hours, minutes, seconds, state_timer
+    global hours, minutes, seconds, state_timer, actual_screen
     while True:
         state_timer = True
         time.sleep(1)
@@ -432,7 +434,8 @@ def timer():
                 if int(hours) == 0:
                     print("Timer Stopped")
                     #ser.write("Timer,Break".encode('utf-8'))
-                    collect_messages("Timer,Break")
+                    if not actual_screen == "Timer":
+                        collect_messages("Timer,Break")
                     stop_timer()
                     stop_music()
                     stop_weather()
@@ -646,7 +649,7 @@ def collect_messages(value: str):
     messages.append(value)
 
 def send():
-    global messages, esp_ip, port, connection
+    global messages, esp_ip, port, connection, actual_screen
     with open("userdata.json", "r", encoding="utf-8") as file:
         data = json.load(file)
         userdata = data["userdata"]
@@ -668,6 +671,7 @@ def send():
                     messages.reverse()
 
                     mode, value = message.strip().split(",", 1)
+                    actual_screen = mode
                     ascii_message = unidecode.unidecode(value)
                     if not mode == "Clock" or mode == "Timer" or mode == "Weather":
                         message_length = calculate_messsage_length(ascii_message)
