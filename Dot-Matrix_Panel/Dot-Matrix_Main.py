@@ -1,4 +1,5 @@
 import serial
+from serial.tools import list_ports
 from datetime import datetime
 import time
 
@@ -14,7 +15,6 @@ import serial.tools.list_ports
 import unidecode
 import os
 import webbrowser
-
 
 app = Flask(__name__)
 
@@ -32,9 +32,7 @@ def index():
             return render_template("landing.html")
 
 
-arduino_port = 'COM6'
 baud_rate = 9600
-#ser = serial.Serial(arduino_port, baud_rate, timeout=1)
 
 running_clock = False
 clock_thread = None
@@ -80,33 +78,57 @@ connection = True #State variable to check if esp is connected or not
 
 @app.route('/initial_connect', methods=["GET"])
 def initial_connect():
+    text = ""
     with open("userdata.json", "r", encoding="utf-8") as file:
         data = json.load(file)
 
     user = data["userdata"][0]
 
     if user.get("ip", "") == "":
-        esp_port = find_esp_port()
-        if not esp_port:
+        ports = list_ports.comports()
+        print(f"Ports: {ports}")
+        if not ports:
             return "No ESP found"
+        for esp_port in ports:
+            message = ""
 
-        try:
-            ser = serial.Serial(esp_port, 9600, timeout=5)
-            ser.write(b"GET_IP\n")
-            #time.sleep(0.05)
-            message = ser.readline().decode("utf-8").strip()
-            while message == "":
-                message = ser.readline().decode("utf-8").strip()
-            ser.close()
-        except Exception as e:
-            return f"Error by serial connection: {e}"
+            try:
+                print(f"ESP port interface: {esp_port.device}")
+                ser = serial.Serial(esp_port.device, baud_rate, timeout=5)
+                ser.reset_input_buffer()
+                ser.reset_output_buffer()
+                ser.write(b"GET_IP\n")
+                #time.sleep(0.05)
+                wait_until = time.time() + 5.0
+                while time.time() < wait_until:
+                    line = ser.readline()
+                    if not line:
+                        # nichts empfangen, weiter versuchen bis Timeout
+                        continue
 
-        user["ip"] = message
-        data["userdata"][0] = user
+                    try:
+                        message = line.decode("utf-8", errors="ignore").strip()
+                    except Exception:
+                        message = line.decode(errors="ignore").strip()
 
-        with open("userdata.json", "w", encoding="utf-8") as file:
-            json.dump(data, file, ensure_ascii=False, indent=4)
-            text = "Connected successfully. Please restart the program now."
+                    print(f"Antwort von {esp_port.device}: '{message}'")
+                    if message:
+                        break
+
+                if message and message.startswith("192."):
+                    ser.close()
+                    user["ip"] = message
+                    data["userdata"][0] = user
+
+                    with open("userdata.json", "w", encoding="utf-8") as file:
+                        json.dump(data, file, ensure_ascii=False, indent=4)
+                        text = "Connected successfully. Please restart the program now."
+                    break
+                else:
+                    print(f"Keine IP-Antwort auf {esp_port.device}, weiter zum nächsten Port.")
+
+            except Exception as e:
+                return f"Error by serial connection: {e}"
 
     return render_template("success.html", text=text)
 
@@ -129,9 +151,9 @@ def check_connection():
     try:
         with open("userdata.json", "r", encoding="utf-8") as file:
             data = json.load(file)
-            userdata = data.get("userdata", [])
+            userdata = data["userdata"][0]
             if userdata:
-                esp_ip = userdata[-1]["ip"]
+                esp_ip = userdata["ip"]
             else:
                 return jsonify({"connected": False})
 
@@ -610,10 +632,14 @@ def send_music(song):
 
 def start_send():
     global send_thread
-    if not send_thread:
-        send_thread = True
-        thread = threading.Thread(target=send, daemon=True)
-        thread.start()
+    with open("userdata.json", "r", encoding="utf-8") as file:
+        data = json.load(file)
+        userdata = data["userdata"][0]
+    if userdata["ip"]:
+        if not send_thread:
+            send_thread = True
+            thread = threading.Thread(target=send, daemon=True)
+            thread.start()
 
 def collect_messages(value: str):
     global messages
