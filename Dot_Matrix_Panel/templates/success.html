@@ -7,31 +7,70 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/static/style.css" rel="stylesheet">
 </head>
+<body>
 <div class="form-container-connect-wrapper">
     <div class="form-settings-container">
-        <p class="header_small" id="status"></p>
+        <p class="header_small" id="status">Try to connect...</p>
     </div>
 </div>
-<body>
+
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script type="text/javascript">
     var socket = io();
+    var statusCheckInterval = null;
+    var isConnected = false;
 
     socket.on('connect', function() {
-        console.log('✓ Mit Server verbunden');
-        // Sobald verbunden, frage nach dem Status
-        socket.emit('request_status');
+        console.log('✓ Connected with server');
+        // Starte automatisches Nachfragen
+        startStatusCheck();
     });
 
     // Empfange Status-Updates
-    socket.on('status_message', function(msg) {
+    socket.on('status_message_serial', function(msg) {
         console.log('Status empfangen:', msg);
         document.getElementById('status').innerText = msg;
+
+        // Prüfe ob "connected" in der Nachricht vorkommt
+        if (msg.toLowerCase().includes('connected') && !isConnected) {
+            isConnected = true;
+            console.log('✓ Connection established...');
+            document.getElementById('status').innerText = '✓ Connected! Redirecting...';
+
+            // Stoppe das Nachfragen
+            stopStatusCheck();
+
+            // Redirect nach 1 Sekunde
+            setTimeout(function() {
+                window.location.href = '/connect';
+            }, 1000);
+        }
     });
 
     socket.on('disconnect', function() {
         console.log('✗ Vom Server getrennt');
-        document.getElementById('status').innerText = 'Verbindung verloren...';
+        document.getElementById('status').innerText = 'Lost connection...';
+        stopStatusCheck();
     });
 
+    function startStatusCheck() {
+        // Erste Abfrage sofort
+        socket.emit('request_esp_serial_status');
+
+        // Dann alle 2 Sekunden nachfragen
+        statusCheckInterval = setInterval(function() {
+            console.log('⟳ Frage nach neuem Status...');
+            socket.emit('request_status');
+        }, 2000); // Alle 2 Sekunden
+    }
+
+    function stopStatusCheck() {
+        if (statusCheckInterval) {
+            clearInterval(statusCheckInterval);
+            statusCheckInterval = null;
+            console.log('Status-Check gestoppt');
+        }
+    }
 </script>
+</body>
+</html>

@@ -10,41 +10,72 @@
 <body>
 <div class="form-container-connect-wrapper">
     <div class="form-settings-container">
-        <h1 class="header_small">Waiting for connection to ESP...</h1>
+        <h1 class="header_small" id="status-header">Waiting for connection to ESP...</h1>
 
-        <div class="spinner-wrapper">
+        <div class="spinner-wrapper" id="spinner">
             <div class="spinner"></div>
         </div>
 
-        {% if connection_state %}
-        <p class="form-label">You have to connect your ESP to this computer. The ESP needs to be flashed with the latest Dot-Matrix_Main_Arduino.ino file via the
-            <a href="https://www.arduino.cc/en/software/">Arduino IDE</a>
-            . Afterward press Connect</p>
-        <a href="/initial_connect" class="btn btn-outline-light">Connect</a>
-        {% else %}
-        <a href="/dashboard" class="btn btn-outline-light">Skip connection</a>
-        {% endif %}
+        <p class="form-label" id="info-text">
+            {% if connection_state %}
+            You have to connect your ESP to this computer. The ESP needs to be flashed with the latest Dot-Matrix_Main_Arduino.ino file via the
+            <a href="https://www.arduino.cc/en/software/">Arduino IDE</a>. Afterward press Connect.
+            {% else %}
+            ESP already configured.
+            {% endif %}
+        </p>
+
+        <div id="button-container">
+            {% if connection_state %}
+            <a href="/initial_connect" class="btn btn-outline-light">Connect</a>
+            {% else %}
+            <a href="/dashboard" class="btn btn-outline-light">Skip connection</a>
+            {% endif %}
+        </div>
     </div>
 </div>
-<script>
-    function checkConnection() {
-        fetch('/check_connection')
-            .then(response => response.json())
-            .then(data => {
-                if (data.connected) {
-                    window.location.href = "/dashboard";  // Zielroute
-                } else {
-                    setTimeout(checkConnection, 1000); // Wiederholen nach 1s
-                }
-            })
-            .catch(error => {
-                console.error("Fehler bei der Verbindung:", error);
-                setTimeout(checkConnection, 1000); // Wiederholen auch bei Fehler
-            });
-    }
 
-    // Starte sofort
-    checkConnection();
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script type="text/javascript">
+    var socket = io();
+    var isConnected = false;
+
+    socket.on('connect', function() {
+        console.log('✓ Connected with server');
+        // Frage nach ESP-Verbindungsstatus
+        socket.emit('request_esp_status');
+    });
+
+    // Empfange ESP-Verbindungsstatus
+    socket.on('esp_connection_status', function(data) {
+        console.log('ESP Status:', data);
+
+        if (data.connected) {
+            isConnected = true;
+            document.getElementById('status-header').innerText = '✓ ESP connected!';
+            document.getElementById('status-header').style.color = '#2ecc71';
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('info-text').innerText = 'Connection successfully established.';
+
+            // Redirect zum Dashboard nach 2 Sekunden
+            setTimeout(function() {
+                window.location.href = "/dashboard";
+            }, 2000);
+        } else {
+            document.getElementById('status-header').innerText = 'Waiting for connection to ESP...';
+            document.getElementById('status-header').style.color = '#fff';
+        }
+    });
+
+    // Empfange Status-Updates während der Verbindung
+    socket.on('esp_status_update', function(msg) {
+        console.log('Status Update:', msg);
+        document.getElementById('info-text').innerText = msg;
+    });
+
+    socket.on('disconnect', function() {
+        console.log('✗ Vom Server getrennt');
+    });
 </script>
 </body>
 </html>

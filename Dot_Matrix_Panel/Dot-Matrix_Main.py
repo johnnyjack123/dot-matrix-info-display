@@ -7,7 +7,6 @@ import webview
 import threading
 import requests
 import json
-import socket
 import asyncio
 from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
 import webbrowser
@@ -80,10 +79,9 @@ connection = True #State variable to check if esp is connected or not
 
 actual_screen = ""
 
-
 @app.route('/initial_connect', methods=["GET"])
 def initial_connect():
-    send_socket("status_message", "Loading")
+    #send_socket("status_message", "Loading")
     return render_template("success.html")
 
 @app.route('/connect', methods=["POST", "GET"])
@@ -624,3 +622,5 @@ if __name__ == '__main__':
         # Hauptthread offenhalten, solange Server läuft
         while True:
             time.sleep(1)
+
+# TODO: Schauen, dass wenn nicht über WLAN verbunden, auch alle Ports nach "GET_IP" absucht, falls sich nur ip des ESPs geändert hat

@@ -6,6 +6,7 @@ import threading
 from Dot_Matrix_Panel.outsourced_functions import read, save
 from Dot_Matrix_Panel.python_serial_debug_window import send_messages
 import Dot_Matrix_Panel.global_variables as global_variables
+from Dot_Matrix_Panel.sockets import send_socket
 
 ser = None
 
@@ -90,7 +91,9 @@ def get_ip():
             esp_data["ip"] = line_splitted[1]
             file["esp_data"] = esp_data
             save(file)
+            global_variables.handshake = True
             send_messages("info", f"IP erhalten: {line_splitted[1]}")
+            #send_socket("status_message", "connected")
             break
     return
 

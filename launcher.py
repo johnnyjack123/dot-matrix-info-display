@@ -66,7 +66,7 @@ def launch_app():
     subprocess.run(["python", "Dot_Matrix_Panel/Dot-Matrix_Main.py"], shell=True)
 
 def check_for_updates():
-    url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/master/Dot-Matrix_Panel/version.txt"
+    url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/master/Dot_Matrix_Panel/version.txt"
     path_version = r"tmp\newest_version.txt"
     folder = os.path.dirname(path_version)
     if not os.path.exists(folder):

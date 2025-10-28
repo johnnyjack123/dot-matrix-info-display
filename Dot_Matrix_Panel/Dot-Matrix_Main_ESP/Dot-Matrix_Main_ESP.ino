@@ -135,7 +135,7 @@ bool connect(){
       } else if (result == WL_CONNECT_FAILED) {
         Serial.println("Connect failed (wrong password?).");
       } else {
-        Serial.println("Other error.");
+        Serial.println("Other error in WIFI connection.");
       }
       return false;
     } 
