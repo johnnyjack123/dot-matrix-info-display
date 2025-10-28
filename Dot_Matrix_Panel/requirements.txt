@@ -5,3 +5,5 @@ requests
 Unidecode
 winrt-windows.media.control
 winrt-windows.foundation
+flask-socketio
+PyQt5

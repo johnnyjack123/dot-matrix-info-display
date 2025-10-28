@@ -4,7 +4,7 @@ import zipfile
 import io
 import os
 import shutil
-import sys
+from Dot_Matrix_Panel.outsourced_functions import create_userdata
 
 def check_internet_connection(url="https://www.google.com", timeout=5):
     try:
@@ -63,7 +63,7 @@ def update():
     launch_app()
 
 def launch_app():
-    subprocess.run(["python", "Dot-Matrix_Panel/Dot-Matrix_Main.py"], shell=True)
+    subprocess.run(["python", "Dot_Matrix_Panel/Dot-Matrix_Main.py"], shell=True)
 
 def check_for_updates():
     url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/master/Dot-Matrix_Panel/version.txt"
@@ -78,7 +78,7 @@ def check_for_updates():
             file.write(response_version.content)
             print("File stored in /tmp")
         try:
-            with open("Dot-Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
+            with open("Dot_Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
                 program_version = float(file.read().strip())
             with open("tmp/newest_version.txt", "r", encoding="utf-8") as file:
                 new_version = float(file.read().strip())
@@ -92,7 +92,7 @@ def check_for_updates():
             update()
     else:
         print("Program is unreachable")
-
+create_userdata()
 if check_internet_connection():
     print("Internet connection")
     check_for_updates()

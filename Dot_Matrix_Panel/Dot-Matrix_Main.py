@@ -1,9 +1,8 @@
-import serial
-from serial.tools import list_ports
 from datetime import datetime
 import time
 
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask_socketio import SocketIO, emit
 import webview
 import threading
 import requests
@@ -11,26 +10,31 @@ import json
 import socket
 import asyncio
 from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
-import serial.tools.list_ports
-import unidecode
-import os
 import webbrowser
+from Dot_Matrix_Panel.outsourced_functions import read, save, get_secret_key
+from Dot_Matrix_Panel.wifi_connection import collect_messages, start_send
+from Dot_Matrix_Panel.serial_connection import start_get_port
+from Dot_Matrix_Panel.python_serial_debug_window import start_serial_monitor_server
+
+secret_key = get_secret_key()
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = secret_key
+socketio = SocketIO(app)
+from Dot_Matrix_Panel import sockets
+sockets.init_socket(socketio)
+from Dot_Matrix_Panel.sockets import send_socket
 
 @app.route('/')
 def index():
     stop_clock()
     stop_weather()
     stop_music()
-
-    with open("userdata.json", "r", encoding="utf-8") as file:
-        data = json.load(file)
-        if data.get("userdata") and any("username" in user for user in data["userdata"]):
-            return redirect(url_for("connect"))
-        else:
-            return render_template("landing.html")
-
+    file = read()
+    if file["userdata"]["username"]:
+        return redirect(url_for("connect"))
+    else:
+        return render_template("landing.html")
 
 baud_rate = 9600
 
@@ -41,7 +45,6 @@ music_thread_started = False
 weather_thread_started = False
 timer_thread = False
 task_thread = False
-send_thread = False
 monitoring_thread = False
 rounded_temperature = ""
 
@@ -57,7 +60,6 @@ note = ""
 remind_time = ""
 task_collection = {}
 
-messages = []
 
 json_structure = {"userdata": []}
 
@@ -78,87 +80,35 @@ connection = True #State variable to check if esp is connected or not
 
 actual_screen = ""
 
+
 @app.route('/initial_connect', methods=["GET"])
 def initial_connect():
-    text = ""
-    with open("userdata.json", "r", encoding="utf-8") as file:
-        data = json.load(file)
-
-    user = data["userdata"][0]
-
-    if user.get("ip", "") == "":
-        ports = list_ports.comports()
-        print(f"Ports: {ports}")
-        if not ports:
-            return "No ESP found"
-        for esp_port in ports:
-            message = ""
-
-            try:
-                print(f"ESP port interface: {esp_port.device}")
-                ser = serial.Serial(esp_port.device, baud_rate, timeout=5)
-                ser.reset_input_buffer()
-                ser.reset_output_buffer()
-                ser.write(b"GET_IP\n")
-                #time.sleep(0.05)
-                wait_until = time.time() + 5.0
-                while time.time() < wait_until:
-                    line = ser.readline()
-                    if not line:
-                        # nichts empfangen, weiter versuchen bis Timeout
-                        continue
-
-                    try:
-                        message = line.decode("utf-8", errors="ignore").strip()
-                    except Exception:
-                        message = line.decode(errors="ignore").strip()
-
-                    print(f"Antwort von {esp_port.device}: '{message}'")
-                    if message:
-                        break
-
-                if message and message.startswith("192."):
-                    ser.close()
-                    user["ip"] = message
-                    data["userdata"][0] = user
-
-                    with open("userdata.json", "w", encoding="utf-8") as file:
-                        json.dump(data, file, ensure_ascii=False, indent=4)
-                        text = "Connected successfully. Please restart the program now."
-                    break
-                else:
-                    print(f"Keine IP-Antwort auf {esp_port.device}, weiter zum nächsten Port.")
-
-            except Exception as e:
-                return f"Error by serial connection: {e}"
-
-    return render_template("success.html", text=text)
+    send_socket("status_message", "Loading")
+    return render_template("success.html")
 
 @app.route('/connect', methods=["POST", "GET"])
 def connect():
-    with open("userdata.json", "r", encoding="utf-8") as file:
-        data = json.load(file)
-        user = data["userdata"][0]
+    data = read()
+    esp_data = data["esp_data"]
 
-        if not user["ip"]:
-            connection_state = True
-        else:
-            connection_state = False
+    if not esp_data["ip"]:
+        connection_state = True
+    else:
+        connection_state = False
 
     return render_template("connect.html", connection_state=connection_state)
-
+"""
 @app.route('/check_connection')
 def check_connection():
     global esp_ip, port
     try:
-        with open("userdata.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
-            userdata = data["userdata"][0]
-            if userdata:
-                esp_ip = userdata["ip"]
-            else:
-                return jsonify({"connected": False})
-
+        file = read()
+        userdata = data["userdata"]
+        if userdata:
+            esp_ip = userdata["ip"]
+        else:
+            return jsonify({"connected": False})
+        
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.settimeout(1)  # max. 1 Sekunde warten
             s.connect((esp_ip, port))
@@ -167,25 +117,25 @@ def check_connection():
             start_thread_monitoring()
             return jsonify({"connected": True})
     except Exception as e:
+        print(f"Error: {e}")
         start_get_time()
         start_send()
         start_thread_monitoring()
         return jsonify({"connected": False})
-
+"""
 
 @app.route('/dashboard')
 def dashboard():
     stop_clock()
     stop_weather()
     stop_music()
-    with open("userdata.json", "r", encoding="utf-8") as file:
-        data = json.load(file)
-        if data.get("userdata") and any("username" in user for user in data["userdata"]):
-            userdata = data.get("userdata", [])
-            username = userdata[-1]["username"]
-            return render_template('dashboard.html', username=username)
-        else:
-            return render_template("landing.html")
+    file = read()
+    userdata = file["userdata"]
+    username = userdata["username"]
+    if username:
+        return render_template('dashboard.html', username=username)
+    else:
+        return render_template("landing.html")
 
 @app.route('/clock')
 def clock():
@@ -310,32 +260,32 @@ def api_connection():
 
 @app.route('/landing', methods=['GET', 'POST'])
 def landing():
-    with open("userdata.json", "r", encoding="utf-8") as file:
-        data = json.load(file)
+    file = read()
 
-    # Check if userdata is existing
-    if "userdata" not in data:
-        data["userdata"] = []
+    username = request.form["username"]
+    weather_api_key = request.form.get("weather_api_key")
+    city = request.form.get("city")
 
-    # Add a new entry
-    new_entry = {
-        "username": request.form["username"],
-        "ip": "",
-        "weather_api_key": request.form.get("weather_api_key"),
-        "city": request.form.get("city"),
-        "open": "App"
-    }
+    ssid = request.form.get("ssid")
+    password = request.form.get("password").replace("\\", "\\")
 
-    data["userdata"].append(new_entry)
-
-    # Save file
-    with open("userdata.json", "w", encoding="utf-8") as file:
-        json.dump(data, file, indent=2)
-
-    if data.get("userdata") and any("username" in user for user in data["userdata"]):
-        return redirect(url_for("connect"))
-    else:
+    if not username or not ssid or not password:
         return render_template("landing.html")
+
+    userdata = file["userdata"]
+    esp_data = file["esp_data"]
+
+    userdata["username"] = username
+    userdata["weather_api_key"] = weather_api_key
+    userdata["city"] = city
+
+    esp_data["ssid"] = ssid
+    esp_data["password"] = password
+
+    file["userdata"] = userdata
+    file["esp_data"] = esp_data
+    save(file)
+    return render_template("connect.html", connection_state = True)
 
 @app.route('/manage_threads', methods=["POST", "GET"])
 def manage_threads():
@@ -348,15 +298,9 @@ def settings_page():
     with open("./Dot-Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
         version = "Version: " + str(file.read().strip())
 
-        # Load file
-        with open("userdata.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
+        data = read()
 
-        if not data.get("userdata") or not isinstance(data["userdata"], list):
-            data["userdata"] = [{}]
-
-        # Takes the first user entry
-        user = data["userdata"][0]
+        user = data["userdata"]
         app_window = user["open"]
         if app_window == "App":
             switch_state = True
@@ -376,15 +320,10 @@ def settings():
             city = request.form.get("city")
             switch = request.form.get("switch")
 
-            # Load file
-            with open("userdata.json", "r", encoding="utf-8") as file:
-                data = json.load(file)
+            data = read()
 
-            if not data.get("userdata") or not isinstance(data["userdata"], list):
-                data["userdata"] = [{}]
 
-            # Takes the first user entry
-            user = data["userdata"][0]
+            user = data["userdata"]
 
             if username:
                 user["username"] = username
@@ -633,112 +572,6 @@ def send_music(song):
             collect_messages("Music," + title)
             current_title = title
 
-def start_send():
-    global send_thread
-    with open("userdata.json", "r", encoding="utf-8") as file:
-        data = json.load(file)
-        userdata = data["userdata"][0]
-    if userdata["ip"]:
-        if not send_thread:
-            send_thread = True
-            thread = threading.Thread(target=send, daemon=True)
-            thread.start()
-
-def collect_messages(value: str):
-    global messages
-    messages.append(value)
-
-def send():
-    global messages, esp_ip, port, connection, actual_screen
-    with open("userdata.json", "r", encoding="utf-8") as file:
-        data = json.load(file)
-        userdata = data["userdata"]
-
-        if userdata:  # Sicherstellen, dass die Liste nicht leer ist
-            esp_ip = userdata[-1]["ip"]  # letzter gespeicherter IP-Eintrag
-            print("ESP IP:", esp_ip)
-        else:
-            print("No userdata available")
-
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((esp_ip, port))
-            print("Connected with ESP")
-            while True:
-                time.sleep(0.1)
-                if len(messages) != 0:
-                    messages.reverse()
-                    message: str = str(messages.pop())
-                    messages.reverse()
-
-                    mode, value = message.strip().split(",", 1)
-                    actual_screen = mode
-                    ascii_message = unidecode.unidecode(value)
-                    if not mode == "Clock" or mode == "Timer" or mode == "Weather":
-                        message_length = calculate_messsage_length(ascii_message)
-                        new_message = mode + "," + message_length
-                        s.sendall((new_message + "\n").encode("ascii"))
-                        print("Message: " + new_message)
-                    else:
-                        s.sendall((message + "\n").encode("ascii"))
-                        print("Message: " + message)
-                    time.sleep(2)
-                #TODO Checking Connection
-                #try:
-                    #s.sendall(("Connection,Connection" + "\n").encode("ascii"))
-                    #data = b""
-                    #while not data.endswith(b'\n'):
-                        #part = s.recv(1024)
-                        #if not part:
-                            #break
-                        #data += part
-
-                    #print("Answer from ESP:", data.decode("utf-8").strip())
-                    #if data.decode("utf-8").strip():
-                        #connection = True
-                    #else:
-                        #connection = False
-                    #print("Connection: " + str(connection))
-
-                #except Exception as e:
-                    #connection = True
-                    #print("Connection: " + str(connection))
-
-def calculate_messsage_length(ascii_message):
-    char_sizes = {}
-    length = 0
-    pixel_amount = 62
-    with open("./Dot-Matrix_Panel/character_size.csv", "r", encoding="utf-8") as file: #Path origin from Launcher.py script
-        for line in file:
-            parts = line.strip().split(",")
-            if len(parts) >= 3:
-                char = parts[0]
-                width = int(parts[1])
-                height = int(parts[2])
-                char_sizes[char] = (width, height)
-
-        for letter in ascii_message:
-            if letter in char_sizes:
-                width, height = char_sizes[letter]
-                length = length + width + 1 #Sum all lengths, for space between letters + 1 TODO Leertaste mit hinzufügen
-            else:
-                length = length + 5
-
-
-        print("Length: " + str(length))
-
-        if length > pixel_amount:
-            for x in ascii_message:
-                last_letter = ascii_message[-1]
-                width, height = char_sizes.get(last_letter, (4, 7))
-                length = length - width - 1
-                ascii_message = ascii_message[:-1]
-                if length <= pixel_amount:
-                    ascii_message = ascii_message + "."
-                    print("New length: " + str(length))
-                    break
-        print("return")
-        return ascii_message
-
 def start_thread_monitoring():
     global monitoring_thread
     if not monitoring_thread:
@@ -765,42 +598,21 @@ def thread_monitoring():
                 sleeping_threads.append(thread["name"])
         time.sleep(3)
 
-def find_esp_port():
-    ports = serial.tools.list_ports.comports()
-    for port in ports:
-        beschreibung = port.description.lower()
-        if "ch340" in beschreibung or "silicon" in beschreibung or "cp210" in beschreibung or "usb serial" in beschreibung or "esp" in beschreibung or "arduino" in beschreibung:
-            return port.device
-    return None
 
 def start_flask():
-    app.run()
+    socketio.run(app, debug=True, use_reloader=False)
 
 # Start
 if __name__ == '__main__':
-
-    if not os.path.exists("userdata.json"):
-        with open("userdata.json", "w", encoding="utf-8") as file:
-            json.dump({"userdata": []}, file, ensure_ascii=False, indent=4)
-            app_window = "App"
-    else:
-        # Datei laden
-        try:
-            with open("userdata.json", "r", encoding="utf-8") as file:
-                data = json.load(file)
-
-            # Nimm nur den ersten Benutzer-Eintrag
-            user = data["userdata"][0]
-            app_window = user.get("open", "App")  # Standardwert falls nicht gesetzt
-        except Exception as e:
-            with open("userdata.json", "w", encoding="utf-8") as file:
-                json.dump({"userdata": []}, file, ensure_ascii=False, indent=4)
-                app_window = "App"
-
+    file = read()
+    userdata = file["userdata"]
+    start_serial_monitor_server()
+    start_get_port()
+    start_send()
     # Starte immer den Flask-Server im Hintergrund
     threading.Thread(target=start_flask, daemon=True).start()
 
-    if app_window == "App":
+    if userdata["open"] == "App":
         # Starte Webview (blockierend!)
         webview.create_window("Dot Matrix Panel Client", "http://127.0.0.1:5000")
         webview.start()

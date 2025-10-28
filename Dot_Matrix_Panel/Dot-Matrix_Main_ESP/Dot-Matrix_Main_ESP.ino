@@ -1,7 +1,7 @@
 #include <MD_MAX72xx.h>
 #include <MD_Parola.h>
 #include <WiFi.h>
-
+#include <Preferences.h>
 
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
 #define MAX_DEVICES 8
@@ -47,11 +47,119 @@ String inputBuffer = "";
 
 String transmissionMode = "WIFI";
 
-const char* ssid = "change me"; // Enter your WIFIs network name
-const char* password = "change me"; // Enter your WIFIs network password
+String ssid = "";
+String password = "";
+
+bool connected = false;
+
+struct split_string_structure {
+  String part0;
+  String part1;
+};
+
+Preferences prefs;
 
 WiFiServer server(1234);  // Port wählen
 WiFiClient client;
+
+split_string_structure split_string(String message) {
+  split_string_structure result;
+  int kommaIndex = message.indexOf(",");
+  
+  if (kommaIndex > 0) {
+    result.part0 = message.substring(0, kommaIndex);
+    result.part1 = message.substring(kommaIndex + 1);
+  } else {
+    result.part0 = message;
+    result.part1 = "";
+  }
+  
+  return result;  // Semikolon nicht vergessen!
+}
+
+void erase_credentials(){
+    prefs.putString("ssid", "");
+    prefs.putString("password", "");
+    ssid = "";
+    password = "";
+}
+
+void safe_credentials(String request){
+  String credentials = request.substring(5);
+  split_string_structure result = split_string(credentials);
+  prefs.putString("ssid", result.part0);
+  prefs.putString("password", result.part1);
+  ssid = result.part0;
+  password = result.part1;
+}
+
+bool handle_serial_input(){
+  if (Serial.available()) {
+    String request = Serial.readStringUntil('\n');
+    if (request == "GET_IP" && connected == true) {
+      Serial.print("IP address:");
+      Serial.println(WiFi.localIP());
+    }else if (request.startsWith("WIFI")){
+      safe_credentials(request);
+      return true;
+    }else if (request == "ERASE"){ // just for debugging
+      erase_credentials();
+      Serial.println("Erased credentials.");
+    }else if (request == "GET_CREDENTIALS"){
+      Serial.print("ssid: ");
+      Serial.print(ssid);
+      Serial.print(", password: ");
+      Serial.print(password);
+    }
+
+  }
+  return false;
+}
+
+bool connect(){
+  WiFi.begin(ssid, password);
+    uint8_t result = WiFi.waitForConnectResult(); // blockiert, aber liefert Grund
+    if (result == WL_CONNECTED) {
+      while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+      }
+      Serial.print("IP address:");
+      Serial.println(WiFi.localIP());
+
+      server.begin();
+      connected = true;
+      return true;
+    } else {
+      if (result == WL_NO_SSID_AVAIL) {
+        Serial.println("SSID not available (wrong SSID or out of range).");
+      } else if (result == WL_CONNECT_FAILED) {
+        Serial.println("Connect failed (wrong password?).");
+      } else {
+        Serial.println("Other error.");
+      }
+      return false;
+    } 
+  }
+
+void try_to_update_credentials(){
+  bool x = true;
+  while (x){
+    Serial.print("Request credentials. ssid: ");
+    Serial.print(ssid);
+    Serial.print("Password: ");
+    Serial.println(password);
+    delay(5);
+    bool updated = handle_serial_input();
+    if (updated == true){
+      bool func_result = connect();
+      if (func_result == true){
+        x = false;
+      }
+    }
+    delay(1000);
+  }
+}
+
 void setup() {
   bool serialModeDetected = false;
   unsigned long startTime;
@@ -67,15 +175,25 @@ void setup() {
   P.displayClear();
 
   Serial.begin(9600);
-    WiFi.begin(ssid, password);
-      while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-      }
-      Serial.print("IP address:");
-      Serial.println(WiFi.localIP());
-
-      server.begin();  
-  }
+  prefs.begin("wifiCredentials", false);
+  ssid = prefs.getString("ssid", "");
+  password = prefs.getString("password", "");
+  Serial.print("ssid: ");
+  Serial.print(ssid);
+  Serial.print(", password: ");
+  Serial.print(password);
+  if (ssid != ""){
+    bool result = connect();
+    if (result == false) {
+      Serial.println("Failed to connect.");
+      try_to_update_credentials();
+  } 
+  
+  } else {
+        Serial.println("No WIFI credentials yet.");
+        try_to_update_credentials();
+    }
+}
 
 void scrollText(char* p) {
   uint8_t charWidth;
@@ -351,27 +469,20 @@ void music(String title) {
 
 void loop() {
   Serial.print(input);
-  if (Serial.available()) {
-    String request = Serial.readStringUntil('\n');
-    if (request == "GET_IP") {
-      Serial.print("IP address:");
-      Serial.println(WiFi.localIP());
-    }
-  }
-  
+  handle_serial_input();
+
   handleClientInput();
 
-  if (input != "") {
-    kommaIndex = input.indexOf(",");
-
-    if (kommaIndex > 0) {
-      parts[0] = input.substring(0, kommaIndex);   // vor dem Komma
-      parts[1] = input.substring(kommaIndex + 1);  // nach dem Komma
-      nextMode = parts[0];
-      value = parts[1];
-    }
-    input = "";
+  if (ssid == ""){
+    try_to_update_credentials();
   }
+  if (input != "") {
+      split_string_structure result = split_string(input);
+      nextMode = result.part0;
+      value = result.part1;
+      input = "";
+    }
+  
 
   if (nextMode == "Timer") {
     nextMode = "";
