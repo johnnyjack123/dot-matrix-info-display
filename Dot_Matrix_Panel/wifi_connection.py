@@ -22,8 +22,8 @@ def send():
         esp_data = file["esp_data"]
         if esp_data:  # Sicherstellen, dass die Liste nicht leer ist
             esp_ip = esp_data["ip"]  # letzter gespeicherter IP-Eintrag
-            logger.info(f"ESP IP: {esp_ip}")
             if esp_data["ip"]:
+                logger.info(f"ESP IP: {esp_ip}")
                 try:
                     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                         s.settimeout(10)
