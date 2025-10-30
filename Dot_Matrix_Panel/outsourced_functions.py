@@ -29,7 +29,7 @@ def calculate_messsage_length(ascii_message):
     char_sizes = {}
     length = 0
     pixel_amount = 62
-    with open("Dot_Matrix_Panel/character_size.csv", "r", encoding="utf-8") as file: #Path origin from Launcher.py script
+    with open("Dot_Matrix_Panel/character_size.csv", "r", encoding="utf-8") as file:
         for line in file:
             parts = line.strip().split(",")
             if len(parts) >= 3:
@@ -41,12 +41,9 @@ def calculate_messsage_length(ascii_message):
         for letter in ascii_message:
             if letter in char_sizes:
                 width, height = char_sizes[letter]
-                length = length + width + 1 #Sum all lengths, for space between letters + 1 TODO Leertaste mit hinzufügen
+                length = length + width + 1 #Sum all lengths, for space between letters + 1
             else:
                 length = length + 5
-
-
-        print("Length: " + str(length))
 
         if length > pixel_amount:
             for x in ascii_message:
@@ -56,9 +53,7 @@ def calculate_messsage_length(ascii_message):
                 ascii_message = ascii_message[:-1]
                 if length <= pixel_amount:
                     ascii_message = ascii_message + "."
-                    print("New length: " + str(length))
                     break
-        print("return")
         return ascii_message
 
 def create_userdata():

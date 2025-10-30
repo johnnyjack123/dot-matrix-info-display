@@ -69,18 +69,15 @@ current_title = ""
 running_threads = []
 sleeping_threads = []
 
-#esp_ip = ""
-#port = 1234
-
 connection = True #State variable to check if esp is connected or not
 
 actual_screen = global_variables.screen
 
-debug = True
+debug = False # Default: False. Set to True to get detailed error messages in the browser and to start a dedicated additional server to see the whole text traffic between Python and the ESP - handy for debugging
 
 @app.route('/initial_connect', methods=["GET"])
 def initial_connect():
-    #send_socket("status_message", "Loading")
+    send_socket("status_message", "Loading")
     return render_template("success.html")
 
 @app.route('/connect', methods=["POST", "GET"])
@@ -578,5 +575,3 @@ if __name__ == '__main__':
         # Hauptthread offenhalten, solange Server läuft
         while True:
             time.sleep(1)
-
-# TODO: Clock zeigt auf Display immer 0

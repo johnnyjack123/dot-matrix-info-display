@@ -20,7 +20,6 @@ def send():
     while True:
         file = read()
         esp_data = file["esp_data"]
-
         if esp_data:  # Sicherstellen, dass die Liste nicht leer ist
             esp_ip = esp_data["ip"]  # letzter gespeicherter IP-Eintrag
             logger.info(f"ESP IP: {esp_ip}")
@@ -42,14 +41,11 @@ def send():
                                 global_variables.screen = mode
                                 ascii_message = unidecode.unidecode(value)
                                 if mode == "Music" or mode == "Tasks" or mode == "Simhub":
-                                    print(f"Message: {message}, mode: {mode}, if")
                                     message_length = calculate_messsage_length(ascii_message)
                                     new_message = mode + "," + message_length
-                                    print(f"Shorted message: {new_message}")
                                     s.sendall((new_message + "\n").encode("ascii"))
                                 elif mode == "Clock" or mode == "Timer" or mode == "Weather":
                                     s.sendall((message + "\n").encode("ascii"))
-                                    print(f"Message: {message}, mode: {mode}, else")
                                 time.sleep(2)
                 except Exception as e:
                     logger.error(f"Error in WIFI connection: {e}")
