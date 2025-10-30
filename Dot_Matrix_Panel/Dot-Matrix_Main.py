@@ -14,12 +14,14 @@ from Dot_Matrix_Panel.outsourced_functions import read, save, get_secret_key
 from Dot_Matrix_Panel.wifi_connection import collect_messages, start_send
 from Dot_Matrix_Panel.serial_connection import start_get_port
 from Dot_Matrix_Panel.python_serial_debug_window import start_serial_monitor_server
+from Dot_Matrix_Panel.logger import logger
+import Dot_Matrix_Panel.global_variables as global_variables
 
 secret_key = get_secret_key()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = secret_key
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode='threading', cors_allowed_origins="*")
 from Dot_Matrix_Panel import sockets
 sockets.init_socket(socketio)
 from Dot_Matrix_Panel.sockets import send_socket
@@ -59,12 +61,7 @@ note = ""
 remind_time = ""
 task_collection = {}
 
-
-json_structure = {"userdata": []}
-
 last_song = ""
-
-transmission_method = ""
 
 title = ""
 current_title = ""
@@ -72,12 +69,14 @@ current_title = ""
 running_threads = []
 sleeping_threads = []
 
-esp_ip = ""
-port = 1234
+#esp_ip = ""
+#port = 1234
 
 connection = True #State variable to check if esp is connected or not
 
-actual_screen = ""
+actual_screen = global_variables.screen
+
+debug = True
 
 @app.route('/initial_connect', methods=["GET"])
 def initial_connect():
@@ -91,36 +90,12 @@ def connect():
 
     if not esp_data["ip"]:
         connection_state = True
+        logger.info("No ESP ip available.")
     else:
         connection_state = False
 
     return render_template("connect.html", connection_state=connection_state)
-"""
-@app.route('/check_connection')
-def check_connection():
-    global esp_ip, port
-    try:
-        file = read()
-        userdata = data["userdata"]
-        if userdata:
-            esp_ip = userdata["ip"]
-        else:
-            return jsonify({"connected": False})
-        
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(1)  # max. 1 Sekunde warten
-            s.connect((esp_ip, port))
-            start_get_time()
-            start_send()
-            start_thread_monitoring()
-            return jsonify({"connected": True})
-    except Exception as e:
-        print(f"Error: {e}")
-        start_get_time()
-        start_send()
-        start_thread_monitoring()
-        return jsonify({"connected": False})
-"""
+
 
 @app.route('/dashboard')
 def dashboard():
@@ -178,7 +153,7 @@ def music():
     start_music()
     time.sleep(0.2)
     send_music(title)
-    print("Title: " + title)
+    #print("Title: " + title)
     return render_template('music.html', title=title)
 
 @app.route('/tasks', methods=['GET', 'POST'])
@@ -189,7 +164,7 @@ def tasks():
             if 'delete' in request.form:
                 delete_time = request.form['delete']
                 task_collection.pop(delete_time, None)
-                print(task_collection)
+                #print(task_collection)
             else:
                 note = request.form['task']
                 remind_time = str(request.form['remind_time'])
@@ -197,7 +172,7 @@ def tasks():
                     return render_template('internal_server_error.html', error="Its not possible to create two tasks with the same time")
                 task_collection[remind_time] = note
                 task_thread = False
-                print(type(remind_time), remind_time)
+                #print(type(remind_time), remind_time)
                 start_tasks()
     return render_template('tasks.html', tasks=task_collection)
 
@@ -283,6 +258,7 @@ def landing():
     file["userdata"] = userdata
     file["esp_data"] = esp_data
     save(file)
+    logger.info("User created.")
     return render_template("connect.html", connection_state = True)
 
 @app.route('/manage_threads', methods=["POST", "GET"])
@@ -293,7 +269,7 @@ def manage_threads():
 
 @app.route('/settings_page', methods=["POST", "GET"])
 def settings_page():
-    with open("./Dot-Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
+    with open("Dot_Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
         version = "Version: " + str(file.read().strip())
 
         data = read()
@@ -310,39 +286,35 @@ def settings_page():
 @app.route('/settings', methods=["POST", "GET"])
 def settings():
     switch_state = True
-    with open("./Dot-Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
-        if request.method == "POST":
-            username = request.form.get("username")
-            esp_ip = request.form.get("ip")
-            api_key = request.form.get("weather_api_key")
-            city = request.form.get("city")
-            switch = request.form.get("switch")
 
-            data = read()
+    if request.method == "POST":
+        username = request.form.get("username")
+        esp_ip = request.form.get("ip")
+        api_key = request.form.get("weather_api_key")
+        city = request.form.get("city")
+        switch = request.form.get("switch")
+
+        file = read()
 
 
-            user = data["userdata"]
+        user = file["userdata"]
 
-            if username:
-                user["username"] = username
-            if esp_ip:
-                user["ip"] = esp_ip
-            if api_key:
-                user["weather_api_key"] = api_key
-            if city:
-                user["city"] = city
+        if username:
+            user["username"] = username
+        if esp_ip:
+            user["ip"] = esp_ip
+        if api_key:
+            user["weather_api_key"] = api_key
+        if city:
+            user["city"] = city
 
-            if switch == "on":
-                user["open"] = "App"
-            else:
-                user["open"] = "Browser"
+        if switch == "on":
+            user["open"] = "App"
+        else:
+            user["open"] = "Browser"
 
-            # Stelle sicher, dass NUR EIN Benutzer gespeichert wird
-            data["userdata"] = [user]
-
-            # Datei zurückschreiben
-            with open("userdata.json", "w", encoding="utf-8") as file:
-                json.dump(data, file, ensure_ascii=False, indent=4)
+        file["userdata"] = user
+        save(file)
         return redirect(url_for("settings_page"))
 
 def start_timer():
@@ -358,7 +330,7 @@ def stop_timer():
     timer_thread = False
 
 def timer():
-    global hours, minutes, seconds, state_timer, actual_screen
+    global hours, minutes, seconds, state_timer
     while True:
         state_timer = True
         time.sleep(1)
@@ -370,9 +342,7 @@ def timer():
                 minutes = int(minutes) - 1
             else:
                 if int(hours) == 0:
-                    print("Timer Stopped")
-                    #ser.write("Timer,Break".encode('utf-8'))
-                    if not actual_screen == "Timer":
+                    if not global_variables.screen == "Timer":
                         collect_messages("Timer,Break")
                     stop_timer()
                     stop_music()
@@ -399,19 +369,13 @@ def tasks():
     global now, task_thread, task_collection
     while True:
         if len(task_collection) > 0:
-            # Über eine KOPIE des Dictionaries iterieren:
             for task_time, task in list(task_collection.items()):
                 current_time = f"{now[3]:02}:{now[4]:02}"
                 if task_time == current_time:
                     time.sleep(0.2)
-                    #ascii_message = unidecode.unidecode(task)
-                    #ascii_message = calculate_messsage_length(task)
                     message = "Notes," + task
                     collect_messages(message)
-                    #print(message)
-                    #print("Note sent")
-                    #print(note_collection)
-                    del task_collection[task_time]  # Sicheres Löschen
+                    del task_collection[task_time]
                     time.sleep(1)
 
                     if not len(task_collection) > 0:
@@ -423,6 +387,7 @@ def tasks():
                 time.sleep(1)
         time.sleep(1)
 
+# Background function to get the time
 def get_time():
     global now
     while True:
@@ -462,22 +427,18 @@ def stop_weather():
 def send_weather_loop():
     last_minute = ""
     count = 14
-    with open("userdata.json", "r", encoding="utf-8") as file:
-        data = json.load(file)
-    if data.get("userdata") and any("username" in user for user in data["userdata"]):
-        userdata = data["userdata"]
-        for user in userdata:
-            if "weather_api_key" in user and "city" in user:
-                API_KEY = user["weather_api_key"]
-                stadt = user["city"]
-                url = f"http://api.openweathermap.org/data/2.5/weather?q={stadt}&appid={API_KEY}&units=metric&lang=de"
+    file = read()
+    if file["userdata"]:
+        userdata = file["userdata"]
+        API_KEY = userdata["weather_api_key"]
+        stadt = userdata["city"]
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={stadt}&appid={API_KEY}&units=metric&lang=de"
 
         while weather_thread_started:
             global now
             if now[4] != last_minute:
                 count = count + 1
                 last_minute = now[4]
-                print(count)
                 if count == 15:
                     try:
                         answer = requests.get(url)
@@ -489,16 +450,14 @@ def send_weather_loop():
                             message = "Weather," + str(rounded_temperature)
                             collect_messages(message)
                             count = 0
-                            print("New temperature set")
                         else:
-                            print("Unable to get weather datas")
+                            logger.error("Unable to get weather datas")
                             rounded_temperature = "Weather unavailable. Please check your API key."
                     except Exception as e:
-                        print("Unable to send message")
+                        logger.error(f"Error in weather: {e}")
             else:
                 time.sleep(1)
 
-# Background function to get the time
 def clock_loop():
     global now
     last_minute = -1
@@ -555,13 +514,10 @@ async def get_song_info():
         album = media_properties.album_title
         if str(title) != last_song:
             send_music(title)
-            print(f"Title: {title}")
-            print(f"Artist: {artist}")
-            print(f"Album: {album}")
             last_song = str(title)
         time.sleep(1)
     else:
-        print("No active media session found.")
+        logger.info("No active media session found.")
 
 def send_music(song):
     global current_title
@@ -596,31 +552,31 @@ def thread_monitoring():
                 sleeping_threads.append(thread["name"])
         time.sleep(3)
 
-
 def start_flask():
-    socketio.run(app, debug=True, use_reloader=False)
+    global debug
+    socketio.run(app, debug=debug, use_reloader=False, allow_unsafe_werkzeug=True)
+    logger.info("Server started")
 
 # Start
 if __name__ == '__main__':
     file = read()
     userdata = file["userdata"]
-    start_serial_monitor_server()
+    if debug:
+        start_serial_monitor_server()
     start_get_port()
     start_send()
+    start_get_time()
     # Starte immer den Flask-Server im Hintergrund
     threading.Thread(target=start_flask, daemon=True).start()
 
     if userdata["open"] == "App":
-        # Starte Webview (blockierend!)
         webview.create_window("Dot Matrix Panel Client", "http://127.0.0.1:5000")
         webview.start()
     else:
-        # App soll im Browser laufen – blockiere Hauptthread nicht sofort
-        print("Starte Web-App im Browser")
         webbrowser.open("http://127.0.0.1:5000")
 
         # Hauptthread offenhalten, solange Server läuft
         while True:
             time.sleep(1)
 
-# TODO: Schauen, dass wenn nicht über WLAN verbunden, auch alle Ports nach "GET_IP" absucht, falls sich nur ip des ESPs geändert hat
+# TODO: Clock zeigt auf Display immer 0

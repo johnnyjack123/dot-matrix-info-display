@@ -1,6 +1,7 @@
 from flask import Flask, render_template_string
 from flask_socketio import SocketIO
 import threading
+from Dot_Matrix_Panel.logger import logger
 
 # Flask App für Serial Monitor
 monitor_app = Flask(__name__)
@@ -101,27 +102,27 @@ def send_messages(mode, msg):
                 'message': msg
             }, namespace='/')
     except Exception as e:
-        print(f"SocketIO emit Fehler: {e}")
+        logger.error(f"SocketIO emit error: {e}")
 
 
 @socketio.on('connect')
 def handle_connect():
     """Wird aufgerufen wenn ein Client sich verbindet"""
-    print("Client mit Serial Monitor verbunden!")
-    send_messages('info', 'Serial Monitor verbunden')
+    logger.info("Client mit Serial Monitor connected!")
+    send_messages('info', 'Serial Monitor connected')
 
 
 @socketio.on('disconnect')
 def handle_disconnect():
     """Wird aufgerufen wenn ein Client sich trennt"""
-    print("Client vom Serial Monitor getrennt!")
+    logger.info("Client disconnected.")
 
 
 def start_serial_monitor_server():
     """Startet den Serial Monitor Server auf Port 5001"""
 
     def run_server():
-        print("🚀 Serial Monitor Server startet auf http://127.0.0.1:5001")
+        logger.info("Serial monitor server starts on http://127.0.0.1:5001, because you are in debug mode.")
         socketio.run(monitor_app,
                      host='127.0.0.1',
                      port=5001,
@@ -132,4 +133,4 @@ def start_serial_monitor_server():
     # Server in separatem Thread starten
     server_thread = threading.Thread(target=run_server, daemon=True)
     server_thread.start()
-    print("✓ Serial Monitor Server Thread gestartet")
+    logger.info("Started serial monitor server thread gestartet")

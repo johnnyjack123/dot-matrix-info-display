@@ -38,44 +38,51 @@
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script type="text/javascript">
     var socket = io();
-    var isConnected = false;
+var isConnected = false;
 
-    socket.on('connect', function() {
-        console.log('✓ Connected with server');
-        // Frage nach ESP-Verbindungsstatus
-        socket.emit('request_esp_status');
-    });
+socket.on('connect', function() {
+    console.log('Connected with server');
+    socket.emit('request_esp_status');
+});
 
-    // Empfange ESP-Verbindungsstatus
-    socket.on('esp_connection_status', function(data) {
-        console.log('ESP Status:', data);
+// WICHTIG: Fängt ALLE eingehenden Events ab
+socket.onAny((eventName, ...args) => {
+    console.log('=== Received ANY event ===');
+    console.log('Event name:', eventName);
+    console.log('Event data:', args);
+});
 
-        if (data.connected) {
-            isConnected = true;
-            document.getElementById('status-header').innerText = '✓ ESP connected!';
-            document.getElementById('status-header').style.color = '#2ecc71';
-            document.getElementById('spinner').style.display = 'none';
-            document.getElementById('info-text').innerText = 'Connection successfully established.';
+socket.on('esp_connection_status', function(data) {
+    console.log('ESP Status Handler called:', data);
+    console.log('Type of data:', typeof data);
+    console.log('data.connected:', data.connected);
+    console.log('Is array?', Array.isArray(data));
 
-            // Redirect zum Dashboard nach 2 Sekunden
-            setTimeout(function() {
-                window.location.href = "/dashboard";
-            }, 2000);
-        } else {
-            document.getElementById('status-header').innerText = 'Waiting for connection to ESP...';
-            document.getElementById('status-header').style.color = '#fff';
-        }
-    });
+    // Falls data ein Array ist, nimm das erste Element
+    var status = Array.isArray(data) ? data[0] : data;
+    console.log('Actual status object:', status);
 
-    // Empfange Status-Updates während der Verbindung
-    socket.on('esp_status_update', function(msg) {
-        console.log('Status Update:', msg);
-        document.getElementById('info-text').innerText = msg;
-    });
+    if (status.connected) {
+        isConnected = true;
+        document.getElementById('status-header').innerText = '✓ ESP connected!';
+        document.getElementById('status-header').style.color = '#2ecc71';
+        document.getElementById('spinner').style.display = 'none';
+        document.getElementById('info-text').innerText = 'Connection successfully established.';
 
-    socket.on('disconnect', function() {
-        console.log('✗ Vom Server getrennt');
-    });
+        setTimeout(function() {
+            window.location.href = "/dashboard";
+        }, 2000);
+    } else {
+        document.getElementById('status-header').innerText = 'Waiting for connection to ESP...';
+        document.getElementById('status-header').style.color = '#fff';
+    }
+});
+
+
+socket.on('disconnect', function() {
+    console.log('Vom Server getrennt');
+});
+
 </script>
 </body>
 </html>
