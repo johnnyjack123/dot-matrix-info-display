@@ -39,7 +39,6 @@ def send_socket(name, msg):
 
     try:
         socketio.emit(name, msg)
-        print(f"Socket sent: name: {name}, msg: {msg}")
     except Exception as e:
         logger.error(f"Socket-Error: {e}")
 
