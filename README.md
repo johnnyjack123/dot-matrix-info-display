@@ -57,10 +57,8 @@ With this tool, you can:
     - `MD_MAX72xx`
     - `MD_Parola`  
     - You can find a detailed library installation guide here:  [Library installation tutorial](https://docs.arduino.cc/software/ide-v2/tutorials/ide-v2-installing-a-library/)
-        
-8. Since the ESP connects to your PC via Wi-Fi, you’ll need to enter your Wi-Fi name (SSID) and password in the ESP code. Replace the placeholder values in lines 53 and 54 in the Dot-Matrix_Main_ESP.ino file. The file is located in /dot-matrix-info-display-master/Dot-Matrix_Panel/Dot-Matrix_Main_ESP/Dot-Matrix_Main_ESP.ino
-    
-9. Once that’s done, you can flash the code onto your ESP.
+         
+8. Once that’s done, you can flash the code onto your ESP.
   
 ---  
 ## Install the Python Program
