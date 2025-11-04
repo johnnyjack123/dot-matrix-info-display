@@ -10,7 +10,7 @@ import json
 import asyncio
 from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
 import webbrowser
-from Dot_Matrix_Panel.outsourced_functions import read, save, get_secret_key
+from outsourced_functions import read, save, get_secret_key
 from Dot_Matrix_Panel.wifi_connection import collect_messages, start_send
 from Dot_Matrix_Panel.serial_connection import start_get_port
 from Dot_Matrix_Panel.python_serial_debug_window import start_serial_monitor_server
