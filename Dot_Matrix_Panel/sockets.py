@@ -1,6 +1,6 @@
 from flask_socketio import emit
-import Dot_Matrix_Panel.global_variables as global_variables
-from Dot_Matrix_Panel.logger import logger
+import global_variables as global_variables
+from logger import logger
 
 socketio = None
 

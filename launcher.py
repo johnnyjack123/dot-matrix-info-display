@@ -3,7 +3,17 @@ import subprocess
 import zipfile
 import io
 import os
+import sys
 import shutil
+
+# Pfad zum Projektverzeichnis hinzufügen
+project_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, project_dir)
+
+# Pfad zum Dot_Matrix_Panel-Ordner hinzufügen
+dot_matrix_dir = os.path.join(project_dir, "Dot_Matrix_Panel")
+sys.path.insert(0, dot_matrix_dir)
+
 from Dot_Matrix_Panel.outsourced_functions import create_userdata
 
 def check_internet_connection(url="https://www.google.com", timeout=5):

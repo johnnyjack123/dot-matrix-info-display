@@ -2,8 +2,8 @@ import json
 import os
 from uuid import uuid4
 import threading
-import Dot_Matrix_Panel.global_variables as global_variables
-from Dot_Matrix_Panel.sockets import send_socket
+import global_variables as global_variables
+from sockets import send_socket
 
 userdata_file_path = "userdata.json"
 
