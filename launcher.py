@@ -17,8 +17,8 @@ def update():
     print("Updating...")
     branch = "master"
     repo = "johnnyjack123/dot-matrix-info-display"
-    folder_to_extract = "Dot-Matrix_Panel"
-    target_folder = "./Dot-Matrix_Panel"
+    folder_to_extract = "Dot_Matrix_Panel"
+    target_folder = "./Dot_Matrix_Panel"
 
     # 1. ZIP vom GitHub-Branch herunterladen
     zip_url = f"https://github.com/{repo}/archive/refs/heads/{branch}.zip"
