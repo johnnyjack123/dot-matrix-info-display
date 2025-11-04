@@ -21,6 +21,29 @@ def connect(esp_port):
     return
 
 
+def get_esp_ports():
+    """Filtert nur ESP-relevante COM-Ports"""
+    # Bekannte VIDs für ESP-Boards
+    esp_vids = [
+        0x10C4,  # Silicon Labs CP210x
+        0x1A86,  # WCH CH340
+        0x0403,  # FTDI
+        0x303A  # Espressif native USB
+    ]
+
+    ports = list_ports.comports()
+    esp_ports = []
+
+    for port in ports:
+        # VID aus hwid extrahieren
+        if port.vid in esp_vids:
+            esp_ports.append(port)
+            logger.info(f"ESP device found: {port.device} - {port.description} [VID:PID={port.vid:04X}:{port.pid:04X}]")
+        else:
+            logger.debug(f"Skipped port: {port.device} - {port.description}")
+
+    return esp_ports
+
 def get_port():
     while True:
         if not global_variables.connected:
@@ -28,7 +51,7 @@ def get_port():
             esp_data = file["esp_data"]
             if esp_data["ssid"] and esp_data["password"]:
                 while not global_variables.connected:
-                    ports = list_ports.comports()
+                    ports = get_esp_ports()
                     for port in ports:
                         logger.info(f"Available ports: {port.device}")
                     if not ports:
