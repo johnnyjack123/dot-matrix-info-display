@@ -77,7 +77,7 @@ debug = False # Default: False. Set to True to get detailed error messages in th
 
 @app.route('/initial_connect', methods=["GET"])
 def initial_connect():
-    send_socket("status_message", "Loading")
+    send_socket("status_message_serial", "Loading")
     return render_template("success.html")
 
 @app.route('/connect', methods=["POST", "GET"])

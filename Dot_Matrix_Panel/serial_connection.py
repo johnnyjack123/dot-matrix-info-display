@@ -29,6 +29,8 @@ def get_port():
             if esp_data["ssid"] and esp_data["password"]:
                 while not global_variables.connected:
                     ports = list_ports.comports()
+                    for port in ports:
+                        logger.info(f"Available ports: {port.device}")
                     if not ports:
                         logger.error("No esp on serial found.")
                         return "No ESP found"
@@ -38,6 +40,9 @@ def get_port():
                             connect(esp_port)
                             wait_until = time.time() + 5.0
                             while time.time() < wait_until:
+                                result = get_ip()
+                                if result:
+                                    break
                                 line = read_serial()
                                 if not line:
                                     continue
@@ -53,9 +58,7 @@ def get_port():
                                     time.sleep(1)
                                     get_ip_thread()
                                     break
-                                result = get_ip()
-                                if result:
-                                    break
+
                         except Exception as e:
                             logger.error(f"Serial connection error: {e}")
                             #return f"Error by serial connection: {e}"
@@ -97,7 +100,6 @@ def get_ip():
         # send_messages("info", f"IP erhalten: {line_splitted[1]}")
         # send_socket("status_message", "connected")
         return True
-
     return False
 
 def get_ip_thread():
