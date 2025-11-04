@@ -52,11 +52,12 @@ def get_port():
             if esp_data["ssid"] and esp_data["password"]:
                 while not global_variables.connected:
                     ports = get_esp_ports()
+                    if not ports:
+                        logger.info("No esp on serial found yet.")
+                        time.sleep(2)
+                        continue
                     for port in ports:
                         logger.info(f"Available ports: {port.device}")
-                    if not ports:
-                        logger.error("No esp on serial found.")
-                        return "No ESP found"
                     for x, esp_port in enumerate(ports):
                         try:
                             logger.info(f"ESP port interface: {esp_port.device}")
