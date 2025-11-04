@@ -3,10 +3,10 @@ from serial.tools import list_ports
 import time
 import threading
 
-from Dot_Matrix_Panel.outsourced_functions import read, save
-from Dot_Matrix_Panel.python_serial_debug_window import send_messages
-import Dot_Matrix_Panel.global_variables as global_variables
-from Dot_Matrix_Panel.logger import logger
+from outsourced_functions import read, save
+from python_serial_debug_window import send_messages
+import global_variables as global_variables
+from logger import logger
 
 ser = None
 
@@ -21,6 +21,29 @@ def connect(esp_port):
     return
 
 
+def get_esp_ports():
+    """Filtert nur ESP-relevante COM-Ports"""
+    # Bekannte VIDs für ESP-Boards
+    esp_vids = [
+        0x10C4,  # Silicon Labs CP210x
+        0x1A86,  # WCH CH340
+        0x0403,  # FTDI
+        0x303A  # Espressif native USB
+    ]
+
+    ports = list_ports.comports()
+    esp_ports = []
+
+    for port in ports:
+        # VID aus hwid extrahieren
+        if port.vid in esp_vids:
+            esp_ports.append(port)
+            logger.info(f"ESP device found: {port.device} - {port.description} [VID:PID={port.vid:04X}:{port.pid:04X}]")
+        else:
+            logger.debug(f"Skipped port: {port.device} - {port.description}")
+
+    return esp_ports
+
 def get_port():
     while True:
         if not global_variables.connected:
@@ -28,16 +51,22 @@ def get_port():
             esp_data = file["esp_data"]
             if esp_data["ssid"] and esp_data["password"]:
                 while not global_variables.connected:
-                    ports = list_ports.comports()
+                    ports = get_esp_ports()
                     if not ports:
-                        logger.error("No esp on serial found.")
-                        return "No ESP found"
+                        logger.info("No esp on serial found yet.")
+                        time.sleep(2)
+                        continue
+                    for port in ports:
+                        logger.info(f"Available ports: {port.device}")
                     for x, esp_port in enumerate(ports):
                         try:
                             logger.info(f"ESP port interface: {esp_port.device}")
                             connect(esp_port)
                             wait_until = time.time() + 5.0
                             while time.time() < wait_until:
+                                result = get_ip()
+                                if result:
+                                    break
                                 line = read_serial()
                                 if not line:
                                     continue
@@ -53,9 +82,7 @@ def get_port():
                                     time.sleep(1)
                                     get_ip_thread()
                                     break
-                                result = get_ip()
-                                if result:
-                                    break
+
                         except Exception as e:
                             logger.error(f"Serial connection error: {e}")
                             #return f"Error by serial connection: {e}"
@@ -97,7 +124,6 @@ def get_ip():
         # send_messages("info", f"IP erhalten: {line_splitted[1]}")
         # send_socket("status_message", "connected")
         return True
-
     return False
 
 def get_ip_thread():

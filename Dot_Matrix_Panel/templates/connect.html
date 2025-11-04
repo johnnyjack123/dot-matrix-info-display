@@ -19,7 +19,7 @@
         <p class="form-label" id="info-text">
             {% if connection_state %}
             You have to connect your ESP to this computer. The ESP needs to be flashed with the latest Dot-Matrix_Main_Arduino.ino file via the
-            <a href="https://www.arduino.cc/en/software/">Arduino IDE</a>. Afterward press Connect.
+            <a href="https://www.arduino.cc/en/software/">Arduino IDE</a>. You may have to wait a few seconds - after connecting you will be redirected to the dashboard.
             {% else %}
             ESP already configured.
             {% endif %}
@@ -27,7 +27,7 @@
 
         <div id="button-container">
             {% if connection_state %}
-            <a href="/initial_connect" class="btn btn-outline-light">Connect</a>
+            <!-- <a href="/initial_connect" class="btn btn-outline-light">Connect</a> -->
             {% else %}
             <a href="/dashboard" class="btn btn-outline-light">Skip connection</a>
             {% endif %}
