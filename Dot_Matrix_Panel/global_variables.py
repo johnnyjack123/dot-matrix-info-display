@@ -6,7 +6,8 @@ handshake = False
 userdata_dict = {"username": "",
                 "weather_api_key": "",
                 "city": "",
-                "open": "App"
+                "open": "App",
+                "auto_update": "yes"
 }
 
 esp_data_dict = {   "ip": "",

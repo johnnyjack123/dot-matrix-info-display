@@ -1,10 +1,5 @@
-import requests
-import subprocess
-import zipfile
-import io
 import os
 import sys
-import shutil
 
 # Pfad zum Projektverzeichnis hinzufügen
 project_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,7 +9,12 @@ sys.path.insert(0, project_dir)
 dot_matrix_dir = os.path.join(project_dir, "Dot_Matrix_Panel")
 sys.path.insert(0, dot_matrix_dir)
 
-from Dot_Matrix_Panel.outsourced_functions import create_userdata
+import requests
+import subprocess
+import zipfile
+import io
+import shutil
+from Dot_Matrix_Panel.outsourced_functions import read, migrate_config, create_userdata
 
 def check_internet_connection(url="https://www.google.com", timeout=5):
     try:
@@ -103,9 +103,13 @@ def check_for_updates():
     else:
         print("Program is unreachable")
 create_userdata()
-if check_internet_connection():
+migrate_config()
+file = read()
+userdata = file["userdata"]
+auto_update = userdata["auto_update"]
+if check_internet_connection() and auto_update == "yes":
     print("Internet connection")
     check_for_updates()
 else:
-    print("No internet connection")
+    print("No internet connection or auto updates disabled.")
     launch_app()

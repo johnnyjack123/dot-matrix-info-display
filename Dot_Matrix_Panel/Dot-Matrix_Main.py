@@ -269,48 +269,57 @@ def settings_page():
     with open("Dot_Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
         version = "Version: " + str(file.read().strip())
 
-        data = read()
+    data = read()
 
-        user = data["userdata"]
-        app_window = user["open"]
-        if app_window == "App":
-            switch_state = True
-        else:
-            switch_state = False
+    payload = {"open": "", "auto_update": ""}
 
-        return render_template("settings.html", version=version, switch_state=switch_state)
+    userdata = data["userdata"]
+    app_window = userdata["open"]
+    if app_window == "App":
+        payload["open"] = "yes"
+    else:
+        payload["open"] = "no"
+
+    auto_update = userdata["auto_update"]
+    payload["auto_update"] = auto_update
+
+    return render_template("settings.html", version=version, payload=payload)
 
 @app.route('/settings', methods=["POST", "GET"])
 def settings():
-    switch_state = True
-
     if request.method == "POST":
         username = request.form.get("username")
         esp_ip = request.form.get("ip")
         api_key = request.form.get("weather_api_key")
         city = request.form.get("city")
-        switch = request.form.get("switch")
+        browser_switch = request.form.get("switch")
+        auto_update = request.form.get("auto_update")
 
         file = read()
-
-
-        user = file["userdata"]
+        userdata = file["userdata"]
+        esp_data = file["esp_data"]
 
         if username:
-            user["username"] = username
+            userdata["username"] = username
         if esp_ip:
-            user["ip"] = esp_ip
+            esp_data["ip"] = esp_ip
         if api_key:
-            user["weather_api_key"] = api_key
+            userdata["weather_api_key"] = api_key
         if city:
-            user["city"] = city
+            userdata["city"] = city
 
-        if switch == "on":
-            user["open"] = "App"
+        if browser_switch == "yes":
+            userdata["open"] = "App"
         else:
-            user["open"] = "Browser"
+            userdata["open"] = "Browser"
 
-        file["userdata"] = user
+        if auto_update == "yes":
+            userdata["auto_update"] = "yes"
+        else:
+            userdata["auto_update"] = "no"
+
+        file["userdata"] = userdata
+        file["esp_data"] = esp_data
         save(file)
         return redirect(url_for("settings_page"))
 
@@ -575,7 +584,6 @@ def start_flask():
 
 # Start
 if __name__ == '__main__':
-    migrate_config()
     if debug:
         start_serial_monitor_server()
     start_get_port()
