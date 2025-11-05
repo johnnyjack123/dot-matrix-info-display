@@ -12,7 +12,7 @@ from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessio
 import webbrowser
 from outsourced_functions import read, save, get_secret_key
 from wifi_connection import collect_messages, start_send
-from serial_connection import start_get_port
+from serial_connection import start_get_port, erase_credentials
 from python_serial_debug_window import start_serial_monitor_server
 from logger import logger
 import global_variables as global_variables
@@ -313,6 +313,25 @@ def settings():
         file["userdata"] = user
         save(file)
         return redirect(url_for("settings_page"))
+
+@app.route('/edit_credentials', methods=["POST"])
+def edit_credentials():
+    ssid = request.form.get("ssid")
+    password = request.form.get("password")
+    if not ssid or not password:
+        return render_template("internal_server_error.html", error="SSID or password is not set.")
+    file = read()
+    esp_data = file["esp_data"]
+    esp_data["ssid"] = ssid
+    esp_data["password"] = password
+    file["esp_data"] = esp_data
+    save(file)
+    return redirect(url_for("connect"))
+
+@app.route('/erase_credentials_on_esp', methods=["GET"])
+def erase_credentials_on_esp():
+    erase_credentials()
+    return redirect(url_for("connect"))
 
 def start_timer():
     global timer_thread

@@ -10,11 +10,14 @@ from logger import logger
 
 ser = None
 
+current_esp_port = None
 
 def connect(esp_port):
-    global ser
+    global ser, current_esp_port
     baud_rate = 9600
     ser = serial.Serial(esp_port.device, baud_rate, timeout=5)
+    if ser and ser.is_open:
+        current_esp_port = esp_port.device
     ser.reset_input_buffer()
     ser.reset_output_buffer()
     logger.info(f"Connected with ESP on port {esp_port.device}.")
@@ -163,3 +166,21 @@ def read_serial():
             send_messages("received", msg) #Write on serial debug website
             return msg
     return None
+
+def erase_credentials():
+    global current_esp_port
+    ports = get_esp_ports()
+    for port in ports:
+        print(f"Current ESP Port: {current_esp_port}, port: {port.device}")
+        if port.device == current_esp_port:
+            send_serial("ERASE")
+        else:
+            baud_rate = 9600
+            sec_ser = serial.Serial(port.device, baud_rate, timeout=1)
+            sec_ser.reset_input_buffer()
+            sec_ser.reset_output_buffer()
+            if sec_ser and sec_ser.is_open:
+                sec_ser.write(("ERASE" + "\n").encode())
+            sec_ser.close()
+        logger.info(f"Send ERASE command on port {port.device}")
+    return
