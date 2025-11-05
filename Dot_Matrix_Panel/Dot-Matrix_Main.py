@@ -6,7 +6,6 @@ from flask_socketio import SocketIO, emit
 import webview
 import threading
 import requests
-import json
 import asyncio
 from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
 import webbrowser

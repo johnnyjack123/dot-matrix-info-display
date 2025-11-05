@@ -52,7 +52,7 @@ def send():
             else:
                 time.sleep(1)
         else:
-            print("No userdata available")
+            logger.error("No userdata available for WIFI connection.")
             time.sleep(1)
 
                     #TODO Checking Connection
