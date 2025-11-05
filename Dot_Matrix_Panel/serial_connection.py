@@ -72,7 +72,7 @@ def get_port():
                                     continue
                                 if line.startswith("Request credentials."):
                                     logger.info("Found ESP on serial.")
-                                    send_messages("info", "ESP gefunden!")
+                                    send_messages("info", "Found ESP on serial.")
                                     file = read()
                                     esp_data = file["esp_data"]
                                     esp_data["esp_port"] = esp_port.device
@@ -82,7 +82,6 @@ def get_port():
                                     time.sleep(1)
                                     get_ip_thread()
                                     break
-
                         except Exception as e:
                             logger.error(f"Serial connection error: {e}")
                             #return f"Error by serial connection: {e}"
@@ -103,9 +102,15 @@ def send_credentials():
     esp_data = file["esp_data"]
     ssid = esp_data["ssid"]
     password = esp_data["password"]
-    msg = f"WIFI:{ssid},{password}"
-    send_serial(msg)
-    logger.info("Sent WIFI credentials to ESP.")
+    while True:
+        msg = f"WIFI:{ssid},{password}"
+        send_serial(msg)
+        logger.info("Sent WIFI credentials to ESP.")
+        time.sleep(1)
+        line = read_serial()
+        if not line.startswith("Request credentials.") or line is None:
+            break
+        logger.info("ESP didn´t received credentials. Try to send again.")
     return
 
 def get_ip():
