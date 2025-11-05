@@ -10,7 +10,7 @@ import json
 import asyncio
 from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
 import webbrowser
-from outsourced_functions import read, save, get_secret_key
+from outsourced_functions import read, save, get_secret_key, migrate_config
 from wifi_connection import collect_messages, start_send
 from serial_connection import start_get_port, erase_credentials
 from python_serial_debug_window import start_serial_monitor_server
@@ -575,8 +575,7 @@ def start_flask():
 
 # Start
 if __name__ == '__main__':
-    file = read()
-    userdata = file["userdata"]
+    migrate_config()
     if debug:
         start_serial_monitor_server()
     start_get_port()
@@ -584,7 +583,8 @@ if __name__ == '__main__':
     start_get_time()
     # Starte immer den Flask-Server im Hintergrund
     threading.Thread(target=start_flask, daemon=True).start()
-
+    file = read()
+    userdata = file["userdata"]
     if userdata["open"] == "App":
         webview.create_window("Dot Matrix Panel Client", "http://127.0.0.1:5000")
         webview.start()

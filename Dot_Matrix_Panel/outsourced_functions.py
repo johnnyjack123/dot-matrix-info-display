@@ -4,8 +4,11 @@ from uuid import uuid4
 import threading
 import global_variables as global_variables
 from sockets import send_socket
+from logger import logger
 
 userdata_file_path = "userdata.json"
+
+count = 0
 
 def save(data):
     global userdata_file_path
@@ -59,25 +62,12 @@ def calculate_messsage_length(ascii_message):
 def create_userdata():
     if not os.path.exists("userdata.json"):
         entry = {
-            "userdata": {
-                "username": "",
-                "weather_api_key": "",
-                "city": "",
-                "open": "App"
-            },
-            "esp_data": {
-                "ip": "",
-                "ssid": "",
-                "password": "",
-                "esp_port": ""
-            },
-            "server_data": {
-                "secret_key": ""
-            }
+            "userdata": global_variables.userdata_dict,
+            "esp_data": global_variables.esp_data_dict,
+            "server_data": global_variables.server_data_dict
         }
         with open("userdata.json", "w", encoding="utf-8") as file:
             json.dump(entry, file, ensure_ascii=False, indent=4)
-            app_window = "App"
     else:
         return
 
@@ -105,3 +95,61 @@ def check_connection():
 def start_get_port():
     thread = threading.Thread(target=check_connection(), daemon=True)
     thread.start()
+
+def deep_update_with_defaults(entry: dict, defaults: dict) -> dict:
+    """Rekursiv Defaults in Entry mergen, ohne bestehende Werte zu überschreiben."""
+    global count
+    for key, default_value in defaults.items():
+        if key not in entry:
+            entry[key] = default_value
+            count += 1
+        elif isinstance(default_value, dict) and isinstance(entry[key], dict):
+            deep_update_with_defaults(entry[key], default_value)
+    return entry
+
+
+def update_config_with_defaults(data: dict, defaults: dict) -> dict:
+    """
+    Aktualisiert JSON-Daten rekursiv:
+    - Listen (z. B. userdata, backup_paths) werden über alle Einträge gemerged
+    - Dicts (z. B. server_data) werden rekursiv zusammengeführt
+    """
+    global count
+    for key, default_schema in defaults.items():
+        if key not in data:
+            data[key] = default_schema
+            count += 1
+        elif isinstance(data[key], list) and isinstance(default_schema, dict):
+            for entry in data[key]:
+                deep_update_with_defaults(entry, default_schema)
+        elif isinstance(data[key], dict) and isinstance(default_schema, dict):
+            deep_update_with_defaults(data[key], default_schema)
+    return data
+
+def migrate_config():
+    global count, userdata_file_path
+    """Lädt Config, migriert sie und speichert sie zurück"""
+
+    # Defaults zusammenstellen
+    defaults = {
+        "userdata": global_variables.userdata_dict,
+        "esp_data": global_variables.esp_data_dict,
+        "server_data": global_variables.server_data_dict
+    }
+
+    # JSON laden
+    with open(userdata_file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    # Schema-Update durchführen (NEUE Funktion!)
+    updated_data = update_config_with_defaults(data, defaults)
+
+    # Zurückschreiben
+    with open(userdata_file_path, "w", encoding="utf-8") as f:
+        json.dump(updated_data, f, indent=4, ensure_ascii=False)
+
+    if count > 0:
+        logger.info(f"File successfully merged. {count} entries changed.")
+    else:
+        logger.info("Nothing merged in userdata file.")
+    return updated_data
