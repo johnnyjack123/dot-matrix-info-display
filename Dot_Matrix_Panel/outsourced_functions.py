@@ -1,10 +1,15 @@
 import json
 import os
+import shutil
 from uuid import uuid4
 import threading
+
+from vedo.examples.other.meshlib1 import result
+
 import global_variables as global_variables
 from sockets import send_socket
 from logger import logger
+import requests
 
 userdata_file_path = "userdata.json"
 
@@ -70,6 +75,28 @@ def create_userdata():
             json.dump(entry, file, ensure_ascii=False, indent=4)
     else:
         return
+
+def create_folders():
+    if not os.path.exists("tmp"):
+        os.makedirs("tmp")
+
+    tmp_launcher_folder = os.path.join("tmp", "launcher")
+    if not os.path.exists(tmp_launcher_folder):
+        os.makedirs(tmp_launcher_folder)
+
+    tmp_old_files = os.path.join("tmp", "old_files")
+    if not os.path.exists(tmp_old_files):
+        os.makedirs(tmp_old_files)
+
+    tmp_old_files_launcher = os.path.join("tmp", "old_files", "launcher")
+    if not os.path.exists(tmp_old_files_launcher):
+        os.makedirs(tmp_old_files_launcher)
+
+    tmp_old_files_main = os.path.join("tmp", "old_files", "main")
+    if not os.path.exists(tmp_old_files_main):
+        os.makedirs(tmp_old_files_main)
+    return
+
 
 def get_secret_key():
     file = read()
@@ -153,3 +180,92 @@ def migrate_config():
     else:
         logger.info("Nothing merged in userdata file.")
     return updated_data
+
+def check_for_updates(url_version, file_name, update):
+    #url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/master/Dot_Matrix_Panel/version.txt"
+    #path_version = r"tmp\newest_version.txt"
+    new_version_file = os.path.join("tmp", file_name)
+    #folder = os.path.dirname(path_version)
+    result = get_file(url_version, new_version_file)
+    if result:
+        try:
+            if update == "launcher":
+                version_file = file_name
+            elif update == "main":
+                version_file = os.path.join("Dot_Matrix_Panel", file_name)
+            else:
+                return f"Wrong update mode set: {update}."
+
+            with open(version_file, "r", encoding="utf-8") as file:
+                program_version = float(file.read().strip())
+            with open(new_version_file, "r", encoding="utf-8") as file:
+                new_version = float(file.read().strip())
+            if new_version > program_version:
+                return "Update"
+            else:
+                print("Program is up to date")
+                logger.info("Program is up to date")
+                return "Launch"
+        except Exception as e:
+            logger.error(f"No {file_name} available.")
+            return "Update"
+    else:
+        return "Launch"
+
+def get_file(url, save_path):
+    response_version = requests.get(url)
+    if response_version.status_code == 200:
+        with open(save_path, "wb") as file:
+            file.write(response_version.content)
+            logger.info(f"{save_path} stored in /tmp")
+            return True
+    else:
+        logger.error(f"File {save_path} is unreachable.")
+        return False
+
+def update_launcher():
+    url_launcher_py = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/test/launcher.py" #TODO: Auf main branch machen
+    url_launcher_bat = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/test/launcher.bat" #TODO: Auf main branch machen
+    tmp_launcher_folder = os.path.join("tmp", "launcher")
+    launcher_py_path = os.path.join(tmp_launcher_folder, "launcher.py")
+    launcher_bat_path = os.path.join(tmp_launcher_folder, "launcher.bat")
+    launcher_py_old_path = os.path.join("tmp", "old_files", "launcher", "launcher.py")
+    launcher_bat_old_path = os.path.join("tmp", "old_files", "launcher", "launcher.bat")
+    result = get_file(url_launcher_py, launcher_py_path)
+    if not result:
+        return False
+    result = get_file(url_launcher_bat, launcher_bat_path)
+    if not result:
+        return False
+    try:
+        shutil.move("launcher.py", launcher_py_old_path)
+        shutil.move("launcher.bat", launcher_bat_old_path)
+    except Exception as e:
+        logger.error(f"Unable to remove launcher files: {e}")
+        return
+    try:
+        shutil.move(launcher_py_path, "launcher.py")
+        shutil.move(launcher_bat_path, "launcher.bat")
+    except Exception as e:
+        logger.error(f"Unable to move launcher files: {e}")
+        shutil.move(launcher_py_old_path, "launcher.py")
+        shutil.move(launcher_bat_old_path, "launcher.bat")
+        return
+    logger.info("Launcher successfully updated.")
+    os.remove(launcher_py_old_path)
+    os.remove(launcher_bat_old_path)
+    logger.info("Old files deleted.")
+    return
+
+def check_for_update_launcher():
+    url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/test/launcher_version.txt" #TODO: Auf main branch machen
+    file_name = "launcher_version.txt"
+    update = "launcher"
+    result = check_for_updates(url_version, file_name, update)
+    if result == "Update":
+        logger.info("Update program launcher.")
+        update_launcher()
+    elif result == "Launch":
+        logger.info("Launcher is up to date.")
+    else:
+        logger.error(f"Error in update process: {result}")

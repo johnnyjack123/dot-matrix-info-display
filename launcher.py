@@ -14,7 +14,8 @@ import subprocess
 import zipfile
 import io
 import shutil
-from Dot_Matrix_Panel.outsourced_functions import read, migrate_config, create_userdata
+from Dot_Matrix_Panel.outsourced_functions import read, migrate_config, create_userdata, check_for_updates, create_folders
+from Dot_Matrix_Panel.logger import logger
 
 def check_internet_connection(url="https://www.google.com", timeout=5):
     try:
@@ -73,43 +74,29 @@ def update():
     launch_app()
 
 def launch_app():
-    subprocess.run(["python", "Dot_Matrix_Panel/Dot-Matrix_Main.py"], shell=True)
+    subprocess.Popen(["python", "Dot_Matrix_Panel/Dot-Matrix_Main.py"])
+    logger.info("Exit launcher.")
+    sys.exit()
 
-def check_for_updates():
-    url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/master/Dot_Matrix_Panel/version.txt"
-    path_version = r"tmp\newest_version.txt"
-    folder = os.path.dirname(path_version)
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    response_version = requests.get(url_version)
-
-    if response_version.status_code == 200:
-        with open(path_version, "wb") as file:
-            file.write(response_version.content)
-            print("File stored in /tmp")
-        try:
-            with open("Dot_Matrix_Panel/version.txt", "r", encoding="utf-8") as file:
-                program_version = float(file.read().strip())
-            with open("tmp/newest_version.txt", "r", encoding="utf-8") as file:
-                new_version = float(file.read().strip())
-            if new_version > program_version:
-                update()
-            else:
-                print("Program is up to date")
-                launch_app()
-        except Exception as e:
-            print("No version.txt available.")
-            update()
-    else:
-        print("Program is unreachable")
 create_userdata()
+create_folders()
 migrate_config()
 file = read()
 userdata = file["userdata"]
 auto_update = userdata["auto_update"]
 if check_internet_connection() and auto_update == "yes":
     print("Internet connection")
-    check_for_updates()
+    url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/master/Dot_Matrix_Panel/version.txt"
+    file_name = "version.txt"
+    update_mode = "main"
+    result = check_for_updates(url_version, file_name, update_mode)
+    if result == "Update":
+        logger.info("Update main program.")
+        update()
+    elif result == "Launch":
+        launch_app()
+    else:
+        logger.error(f"Error in update process: {result}")
 else:
     print("No internet connection or auto updates disabled.")
     launch_app()
