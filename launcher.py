@@ -13,8 +13,8 @@ import requests
 import subprocess
 import zipfile
 import io
-import shutil
-from Dot_Matrix_Panel.outsourced_functions import read, migrate_config, create_userdata, check_for_updates, create_folders, check_file_access
+import Dot_Matrix_Panel.safe_shutil as shutil
+from Dot_Matrix_Panel.outsourced_functions import read, migrate_config, create_userdata, check_for_updates, create_folders
 from Dot_Matrix_Panel.logger import logger
 import Dot_Matrix_Panel.global_variables as global_variables
 
@@ -25,6 +25,58 @@ def check_internet_connection(url="https://www.google.com", timeout=5):
         requests.get(url, timeout=timeout)
         return True
     except requests.RequestException:
+        return False
+
+
+def safe_replace_folder(source_folder, target_folder):
+    """
+    Ersetzt den Zielordner nur, wenn das Kopieren erfolgreich war.
+    """
+    backup_folder = f"{target_folder}_old"
+    new_folder = f"{target_folder}_new"
+
+    # Falls alte Backups existieren
+    for folder in (backup_folder, new_folder):
+        if os.path.exists(folder):
+            shutil.rmtree(folder, ignore_errors=True)
+
+    try:
+        # 1️⃣ Neue Version in temporären Ordner kopieren
+        shutil.copytree(source_folder, new_folder)
+        logger.info("Copied new version to temp folder.")
+
+        # 2️⃣ Teste, ob wichtige Dateien vorhanden sind
+        must_have = ["version.txt", "Dot-Matrix_Main.py"]
+        for f in must_have:
+            if not os.path.exists(os.path.join(new_folder, f)):
+                raise FileNotFoundError(f"Required file missing: {f}")
+
+        # 3️⃣ Alte Version sichern
+        if os.path.exists(target_folder):
+            try:
+                os.rename(target_folder, backup_folder)
+                logger.info("Renamed old folder to backup.")
+            except PermissionError:
+                logger.error("Cannot rename old folder (file in use). Update aborted.")
+                shutil.rmtree(new_folder, ignore_errors=True)
+                return False
+
+        # 4️⃣ Neue Version aktivieren
+        os.rename(new_folder, target_folder)
+        logger.info("Activated new version successfully.")
+
+        # 5️⃣ Alte Version löschen
+        shutil.rmtree(backup_folder, ignore_errors=True)
+        logger.info("Removed old backup.")
+        return True
+
+    except Exception as e:
+        logger.error(f"Update failed: {e}")
+        # Im Fehlerfall: Rückfall auf alte Version
+        if os.path.exists(backup_folder) and not os.path.exists(target_folder):
+            os.rename(backup_folder, target_folder)
+            logger.warning("Restored old version due to update failure.")
+        shutil.rmtree(new_folder, ignore_errors=True)
         return False
 
 def update():
@@ -75,43 +127,13 @@ def update():
         logger.error(f"❌ Folder '{folder_to_extract}' not found in ZIP!")
         return
 
-    old_main_path = os.path.join("tmp", "old_files", "main")
+    #old_main_path = os.path.join("tmp", "old_files", "main")
 
     if os.path.exists(target_folder):
-        try:
-            check_file_access(target_folder)
-            check_file_access(old_main_path)
-            shutil.move(target_folder, old_main_path)
-            logger.info("Moved old version in tmp.")
-        except Exception as e:
-            state = False
-            logger.error(f"Error in moving old version of main folder: {e}. Program stays on old version.")
-        if not state:
-            pass
-        else:
-            try:
-                check_file_access(source_folder)
-                check_file_access(target_folder)
-                shutil.move(source_folder, target_folder)
-                logger.info("Moved new version in root directory.")
-            except Exception as e:
-                check_file_access(source_folder)
-                check_file_access(target_folder)
-                shutil.move(old_main_path, target_folder)
-                logger.error(f"Error in moving new version of main folder: {e}. Programm stays on old version.")
-            if not state:
-                pass
-            else:
-                try:
-                    old_main_dir_path = os.path.join("tmp", "old_files", "main")
-                    check_file_access(tmp_dir)
-                    check_file_access(old_main_dir_path)
-                    shutil.rmtree(tmp_dir)
-                    shutil.rmtree(old_main_dir_path)
-                    print("🧹 Remove temporary files.")
-                    logger.info("Removed old version.")
-                except PermissionError as e:
-                    logger.error(f"Permission error: {e}")
+        update_successful = safe_replace_folder(source_folder, target_folder)
+        if not update_successful:
+            logger.error("Update aborted, old version restored.")
+            return
     else:
         logger.error("Target folder doesn´t exists.")
     launch_app()

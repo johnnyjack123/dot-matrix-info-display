@@ -1,6 +1,7 @@
 import json
 import os
-import shutil
+import safe_shutil as shutil
+from Dot_Matrix_Panel.safe_shutil import _check_path
 from uuid import uuid4
 import threading
 
@@ -237,54 +238,28 @@ def update_launcher():
     result = get_file(url_launcher_bat, launcher_bat_path)
     if not result:
         return False
-    try:
-        try:
-            check_file_access("launcher.py")
-            check_file_access(launcher_py_old_path)
-            check_file_access("launcher.bat")
-            check_file_access(launcher_bat_old_path)
-        except PermissionError as e:
-            logger.error(f"Permission error: {e}")
 
+    try:
         shutil.move("launcher.py", launcher_py_old_path)
         shutil.move("launcher.bat", launcher_bat_old_path)
-    except Exception as e:
+    except PermissionError as e:
         logger.error(f"Unable to move old launcher files: {e}")
-        return
+
     try:
-        try:
-            check_file_access(launcher_py_path)
-            check_file_access("launcher.py")
-            check_file_access(launcher_bat_path)
-            check_file_access("launcher.bat")
-        except PermissionError as e:
-            logger.error(f"Permission error: {e}")
         shutil.move(launcher_py_path, "launcher.py")
         shutil.move(launcher_bat_path, "launcher.bat")
-    except Exception as e:
-        logger.error(f"Unable to move launcher files: {e}")
-        try:
-            check_file_access(launcher_py_old_path)
-            check_file_access("launcher.py")
-            check_file_access(launcher_bat_old_path)
-            check_file_access("launcher.bat")
-        except PermissionError as e:
-            logger.error(f"Permission error: {e}")
-        shutil.move(launcher_py_old_path, "launcher.py")
-        shutil.move(launcher_bat_old_path, "launcher.bat")
-        return
-    logger.info("Launcher successfully updated.")
-    new_launcher_version_path = os.path.join("tmp", "launcher_version.txt")
-    try:
-        check_file_access(launcher_py_old_path)
-        check_file_access(launcher_bat_old_path)
-        check_file_access(new_launcher_version_path)
-        check_file_access("launcher_version.txt")
     except PermissionError as e:
         logger.error(f"Permission error: {e}")
-    os.remove(launcher_py_old_path)
-    os.remove(launcher_bat_old_path)
-    os.remove("launcher_version.txt")
+        shutil.move(launcher_py_old_path, "launcher.py")
+        shutil.move(launcher_bat_old_path, "launcher.bat")
+
+
+    logger.info("Launcher successfully updated.")
+    new_launcher_version_path = os.path.join("tmp", "launcher_version.txt")
+    for path in [launcher_py_old_path, launcher_bat_old_path, "launcher_version.txt"]:
+        _check_path(path)
+        os.remove(path)
+
     shutil.move(new_launcher_version_path, "launcher_version.txt")
     logger.info("Old files deleted.")
     return
@@ -306,13 +281,3 @@ def check_for_update_launcher():
         logger.info("Launcher is up to date.")
     else:
         logger.error(f"Error in update process: {result}")
-
-
-def check_file_access(file_path):
-    """Only allows access to files in the project directory"""
-    file_path = Path(file_path).resolve()
-    project_dir = Path(global_variables.project_dir).resolve()  # sicherstellen, dass ein Path-Objekt und resolve!
-    if not file_path.is_relative_to(project_dir):
-        raise PermissionError(
-            f"Access denied: {file_path} is not located in the project directory."
-        )
