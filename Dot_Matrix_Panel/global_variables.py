@@ -2,6 +2,7 @@ screen = ""
 send_thread = False
 connected = False
 handshake = False
+project_dir = ""
 
 userdata_dict = {"username": "",
                 "weather_api_key": "",

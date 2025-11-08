@@ -4,12 +4,13 @@ import shutil
 from uuid import uuid4
 import threading
 
-from vedo.examples.other.meshlib1 import result
+#from vedo.examples.other.meshlib1 import result
 
 import global_variables as global_variables
 from sockets import send_socket
 from logger import logger
 import requests
+from pathlib import Path
 
 userdata_file_path = "userdata.json"
 
@@ -241,7 +242,7 @@ def update_launcher():
         shutil.move("launcher.py", launcher_py_old_path)
         shutil.move("launcher.bat", launcher_bat_old_path)
     except Exception as e:
-        logger.error(f"Unable to remove launcher files: {e}")
+        logger.error(f"Unable to move old launcher files: {e}")
         return
     try:
         shutil.move(launcher_py_path, "launcher.py")
@@ -269,3 +270,14 @@ def check_for_update_launcher():
         logger.info("Launcher is up to date.")
     else:
         logger.error(f"Error in update process: {result}")
+
+
+def check_file_access(file_path):
+    """Only allows access to files in the project directory"""
+    file_path = Path(file_path).resolve()
+
+    # Sicherheitsprüfung - nur im Projektverzeichnis erlaubt
+    if not file_path.is_relative_to(global_variables.project_dir):
+        raise PermissionError(
+            f"Access denied: {file_path} is not located in the project directory."
+        )
