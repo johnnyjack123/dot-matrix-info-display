@@ -7,6 +7,7 @@ import threading
 #from vedo.examples.other.meshlib1 import result
 
 import global_variables as global_variables
+from launcher import server_data
 from sockets import send_socket
 from logger import logger
 import requests
@@ -183,10 +184,7 @@ def migrate_config():
     return updated_data
 
 def check_for_updates(url_version, file_name, update):
-    #url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/master/Dot_Matrix_Panel/version.txt"
-    #path_version = r"tmp\newest_version.txt"
     new_version_file = os.path.join("tmp", file_name)
-    #folder = os.path.dirname(path_version)
     result = get_file(url_version, new_version_file)
     if result:
         try:
@@ -225,8 +223,10 @@ def get_file(url, save_path):
         return False
 
 def update_launcher():
-    branch = global_variables.branch
-    repo = global_variables.repo
+    file = read()
+    server_data = file["server_data"]
+    branch = server_data["branch"]
+    repo = server_data["repo"]
     url_launcher_py = f"https://raw.githubusercontent.com/{repo}/refs/heads/{branch}/launcher.py"
     url_launcher_bat = f"https://raw.githubusercontent.com/{repo}/refs/heads/{branch}/launcher.bat"
     tmp_launcher_folder = os.path.join("tmp", "launcher")
@@ -293,8 +293,10 @@ def update_launcher():
     return
 
 def check_for_update_launcher():
-    branch = global_variables.branch
-    repo = global_variables.repo
+    file = read()
+    server_data = file["server_data"]
+    branch = server_data["branch"]
+    repo = server_data["repo"]
     url_version = f"https://raw.githubusercontent.com/{repo}/refs/heads/{branch}/launcher_version.txt"
     file_name = "launcher_version.txt"
     update = "launcher"

@@ -3,8 +3,6 @@ send_thread = False
 connected = False
 handshake = False
 project_dir = ""
-branch = "master"
-repo = "johnnyjack123/dot-matrix-info-display"
 
 userdata_dict = {"username": "",
                 "weather_api_key": "",
@@ -20,5 +18,7 @@ esp_data_dict = {   "ip": "",
 }
 
 server_data_dict = {
-        "secret_key": ""
+        "secret_key": "",
+        "update_branch": "master",
+        "update_repo": "johnnyjack123/dot-matrix-info-display"
 }

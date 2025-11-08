@@ -127,10 +127,11 @@ migrate_config()
 file = read()
 userdata = file["userdata"]
 auto_update = userdata["auto_update"]
+server_data = file["server_data"]
 if check_internet_connection() and auto_update == "yes":
     print("Internet connection")
-    branch = global_variables.branch
-    repo = global_variables.repo
+    branch = server_data["branch"]
+    repo = server_data["repo"]
     url_version = f"https://raw.githubusercontent.com/{repo}/refs/heads/{branch}/Dot_Matrix_Panel/version.txt"
     file_name = "version.txt"
     update_mode = "main"
