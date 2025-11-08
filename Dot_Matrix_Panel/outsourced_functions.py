@@ -277,13 +277,18 @@ def update_launcher():
         shutil.move(launcher_bat_old_path, "launcher.bat")
         return
     logger.info("Launcher successfully updated.")
+    new_launcher_version_path = os.path.join("tmp", "launcher_version.txt")
     try:
         check_file_access(launcher_py_old_path)
         check_file_access(launcher_bat_old_path)
+        check_file_access(new_launcher_version_path)
+        check_file_access("launcher_version.txt")
     except PermissionError as e:
         logger.error(f"Permission error: {e}")
     os.remove(launcher_py_old_path)
     os.remove(launcher_bat_old_path)
+    os.remove("launcher_version.txt")
+    shutil.move(new_launcher_version_path, "launcher_version.txt")
     logger.info("Old files deleted.")
     return
 
