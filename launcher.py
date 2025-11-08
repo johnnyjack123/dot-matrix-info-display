@@ -30,8 +30,11 @@ def check_internet_connection(url="https://www.google.com", timeout=5):
 def update():
     print("Updating...")
     logger.info("Updating...")
-    branch = global_variables.branch
-    repo = global_variables.repo
+
+    file = read()
+    server_data = file["server_data"]
+    branch = server_data["update_branch"]
+    repo = server_data["update_repo"]
 
     folder_to_extract = "Dot_Matrix_Panel"
     target_folder = "Dot_Matrix_Panel"
