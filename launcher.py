@@ -114,7 +114,9 @@ def update():
 
 
 def launch_app():
-    subprocess.Popen(["python", "Dot_Matrix_Panel/Dot-Matrix_Main.py"])
+    python_executable = sys.executable  # das ist der aktuell laufende/interaktive venv-Python
+    script_path = os.path.join("Dot_Matrix_Panel", "Dot-Matrix_Main.py")
+    subprocess.Popen([python_executable, script_path])
     logger.info("Exit launcher.")
     sys.exit()
 
