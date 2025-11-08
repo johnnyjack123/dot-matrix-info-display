@@ -30,8 +30,9 @@ def check_internet_connection(url="https://www.google.com", timeout=5):
 def update():
     print("Updating...")
     logger.info("Updating...")
-    branch = "master"
-    repo = "johnnyjack123/dot-matrix-info-display"
+    branch = global_variables.branch
+    repo = global_variables.repo
+
     folder_to_extract = "Dot_Matrix_Panel"
     target_folder = "Dot_Matrix_Panel"
     state = True
@@ -128,7 +129,9 @@ userdata = file["userdata"]
 auto_update = userdata["auto_update"]
 if check_internet_connection() and auto_update == "yes":
     print("Internet connection")
-    url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/master/Dot_Matrix_Panel/version.txt"
+    branch = global_variables.branch
+    repo = global_variables.repo
+    url_version = f"https://raw.githubusercontent.com/{repo}/refs/heads/{branch}/Dot_Matrix_Panel/version.txt"
     file_name = "version.txt"
     update_mode = "main"
     result = check_for_updates(url_version, file_name, update_mode)

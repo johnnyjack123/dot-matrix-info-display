@@ -9,7 +9,7 @@ import requests
 import asyncio
 from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
 import webbrowser
-from outsourced_functions import read, save, get_secret_key, migrate_config
+from outsourced_functions import read, save, get_secret_key, migrate_config, check_for_update_launcher
 from wifi_connection import collect_messages, start_send
 from serial_connection import start_get_port, erase_credentials
 from python_serial_debug_window import start_serial_monitor_server
@@ -583,6 +583,7 @@ def start_flask():
 
 # Start
 if __name__ == '__main__':
+    check_for_update_launcher()
     if debug:
         start_serial_monitor_server()
     start_get_port()

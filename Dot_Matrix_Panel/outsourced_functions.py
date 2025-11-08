@@ -225,8 +225,10 @@ def get_file(url, save_path):
         return False
 
 def update_launcher():
-    url_launcher_py = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/test/launcher.py" #TODO: Auf main branch machen
-    url_launcher_bat = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/test/launcher.bat" #TODO: Auf main branch machen
+    branch = global_variables.branch
+    repo = global_variables.repo
+    url_launcher_py = f"https://raw.githubusercontent.com/{repo}/refs/heads/{branch}/launcher.py"
+    url_launcher_bat = f"https://raw.githubusercontent.com/{repo}/refs/heads/{branch}/launcher.bat"
     tmp_launcher_folder = os.path.join("tmp", "launcher")
     launcher_py_path = os.path.join(tmp_launcher_folder, "launcher.py")
     launcher_bat_path = os.path.join(tmp_launcher_folder, "launcher.bat")
@@ -259,7 +261,9 @@ def update_launcher():
     return
 
 def check_for_update_launcher():
-    url_version = "https://raw.githubusercontent.com/johnnyjack123/dot-matrix-info-display/refs/heads/test/launcher_version.txt" #TODO: Auf main branch machen
+    branch = global_variables.branch
+    repo = global_variables.repo
+    url_version = f"https://raw.githubusercontent.com/{repo}/refs/heads/{branch}/launcher_version.txt"
     file_name = "launcher_version.txt"
     update = "launcher"
     result = check_for_updates(url_version, file_name, update)
