@@ -19,6 +19,6 @@ esp_data_dict = {   "ip": "",
 
 server_data_dict = {
         "secret_key": "",
-        "update_branch": "master",
+        "update_branch": "feature_drop_and_fixes",
         "update_repo": "johnnyjack123/dot-matrix-info-display"
 }

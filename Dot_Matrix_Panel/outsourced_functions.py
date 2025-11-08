@@ -300,6 +300,7 @@ def check_for_update_launcher():
     result = check_for_updates(url_version, file_name, update)
     if result == "Update":
         logger.info("Update program launcher.")
+        print("Update program launcher.")
         update_launcher()
     elif result == "Launch":
         logger.info("Launcher is up to date.")
