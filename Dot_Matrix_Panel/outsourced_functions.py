@@ -241,20 +241,47 @@ def update_launcher():
     if not result:
         return False
     try:
+        try:
+            check_file_access("launcher.py")
+            check_file_access(launcher_py_old_path)
+            check_file_access("launcher.bat")
+            check_file_access(launcher_bat_old_path)
+        except PermissionError as e:
+            logger.error(f"Permission error: {e}")
+
         shutil.move("launcher.py", launcher_py_old_path)
         shutil.move("launcher.bat", launcher_bat_old_path)
     except Exception as e:
         logger.error(f"Unable to move old launcher files: {e}")
         return
     try:
+        try:
+            check_file_access(launcher_py_path)
+            check_file_access("launcher.py")
+            check_file_access(launcher_bat_path)
+            check_file_access("launcher.bat")
+        except PermissionError as e:
+            logger.error(f"Permission error: {e}")
         shutil.move(launcher_py_path, "launcher.py")
         shutil.move(launcher_bat_path, "launcher.bat")
     except Exception as e:
         logger.error(f"Unable to move launcher files: {e}")
+        try:
+            check_file_access(launcher_py_old_path)
+            check_file_access("launcher.py")
+            check_file_access(launcher_bat_old_path)
+            check_file_access("launcher.bat")
+        except PermissionError as e:
+            logger.error(f"Permission error: {e}")
         shutil.move(launcher_py_old_path, "launcher.py")
         shutil.move(launcher_bat_old_path, "launcher.bat")
         return
     logger.info("Launcher successfully updated.")
+    try:
+        check_file_access(launcher_py_old_path)
+        check_file_access(launcher_bat_old_path)
+    except PermissionError as e:
+        logger.error(f"Permission error: {e}")
     os.remove(launcher_py_old_path)
     os.remove(launcher_bat_old_path)
     logger.info("Old files deleted.")
