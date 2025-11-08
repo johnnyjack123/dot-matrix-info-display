@@ -221,7 +221,7 @@ def get_file(url, save_path):
             logger.info(f"{save_path} stored in /tmp")
             return True
     else:
-        logger.error(f"File {save_path} is unreachable.")
+        logger.error(f"File {save_path} is unreachable on repo {global_variables.repo} and branch {global_variables.branch}.")
         return False
 
 def update_launcher():
