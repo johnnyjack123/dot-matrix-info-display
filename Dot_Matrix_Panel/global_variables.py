@@ -3,7 +3,7 @@ send_thread = False
 connected = False
 handshake = False
 project_dir = ""
-branch = "master"
+branch = "feature_drop_and_fixes"
 repo = "johnnyjack123/dot-matrix-info-display"
 
 userdata_dict = {"username": "",

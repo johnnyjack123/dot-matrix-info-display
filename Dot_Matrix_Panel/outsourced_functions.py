@@ -311,9 +311,8 @@ def check_for_update_launcher():
 def check_file_access(file_path):
     """Only allows access to files in the project directory"""
     file_path = Path(file_path).resolve()
-
-    # Sicherheitsprüfung - nur im Projektverzeichnis erlaubt
-    if not file_path.is_relative_to(global_variables.project_dir):
+    project_dir = Path(global_variables.project_dir).resolve()  # sicherstellen, dass ein Path-Objekt und resolve!
+    if not file_path.is_relative_to(project_dir):
         raise PermissionError(
             f"Access denied: {file_path} is not located in the project directory."
         )

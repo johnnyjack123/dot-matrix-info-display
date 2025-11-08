@@ -19,7 +19,7 @@ from Dot_Matrix_Panel.logger import logger
 import Dot_Matrix_Panel.global_variables as global_variables
 
 global_variables.project_dir = project_dir
-
+logger.info(f"Project directory: {project_dir}")
 def check_internet_connection(url="https://www.google.com", timeout=5):
     try:
         requests.get(url, timeout=timeout)
