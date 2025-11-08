@@ -4,10 +4,7 @@ import shutil
 from uuid import uuid4
 import threading
 
-#from vedo.examples.other.meshlib1 import result
-
 import global_variables as global_variables
-from launcher import server_data
 from sockets import send_socket
 from logger import logger
 import requests
@@ -225,8 +222,8 @@ def get_file(url, save_path):
 def update_launcher():
     file = read()
     server_data = file["server_data"]
-    branch = server_data["branch"]
-    repo = server_data["repo"]
+    branch = server_data["update_branch"]
+    repo = server_data["update_repo"]
     url_launcher_py = f"https://raw.githubusercontent.com/{repo}/refs/heads/{branch}/launcher.py"
     url_launcher_bat = f"https://raw.githubusercontent.com/{repo}/refs/heads/{branch}/launcher.bat"
     tmp_launcher_folder = os.path.join("tmp", "launcher")
@@ -295,8 +292,8 @@ def update_launcher():
 def check_for_update_launcher():
     file = read()
     server_data = file["server_data"]
-    branch = server_data["branch"]
-    repo = server_data["repo"]
+    branch = server_data["update_branch"]
+    repo = server_data["update_repo"]
     url_version = f"https://raw.githubusercontent.com/{repo}/refs/heads/{branch}/launcher_version.txt"
     file_name = "launcher_version.txt"
     update = "launcher"

@@ -130,8 +130,8 @@ auto_update = userdata["auto_update"]
 server_data = file["server_data"]
 if check_internet_connection() and auto_update == "yes":
     print("Internet connection")
-    branch = server_data["branch"]
-    repo = server_data["repo"]
+    branch = server_data["update_branch"]
+    repo = server_data["update_repo"]
     url_version = f"https://raw.githubusercontent.com/{repo}/refs/heads/{branch}/Dot_Matrix_Panel/version.txt"
     file_name = "version.txt"
     update_mode = "main"
