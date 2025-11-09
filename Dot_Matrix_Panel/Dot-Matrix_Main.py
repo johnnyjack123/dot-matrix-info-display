@@ -9,21 +9,31 @@ import requests
 import asyncio
 from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
 import webbrowser
-from outsourced_functions import read, save, get_secret_key, migrate_config, check_for_update_launcher
-from wifi_connection import collect_messages, start_send
-from serial_connection import start_get_port, erase_credentials
-from python_serial_debug_window import start_serial_monitor_server
-from logger import logger
-import global_variables as global_variables
+import argparse
+
+import Dot_Matrix_Panel.global_variables as global_variables
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--project-dir", default=None)
+args, _ = parser.parse_known_args()
+
+if args.project_dir:
+    global_variables.project_dir = args.project_dir
+
+from Dot_Matrix_Panel.outsourced_functions import read, save, get_secret_key, migrate_config, check_for_update_launcher
+from Dot_Matrix_Panel.wifi_connection import collect_messages, start_send
+from Dot_Matrix_Panel.serial_connection import start_get_port, erase_credentials
+from Dot_Matrix_Panel.python_serial_debug_window import start_serial_monitor_server
+from Dot_Matrix_Panel.logger import logger
 
 secret_key = get_secret_key()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = secret_key
 socketio = SocketIO(app, async_mode='threading', cors_allowed_origins="*")
-import sockets
+import Dot_Matrix_Panel.sockets as sockets
 sockets.init_socket(socketio)
-from sockets import send_socket
+from Dot_Matrix_Panel.sockets import send_socket
 
 @app.route('/')
 def index():

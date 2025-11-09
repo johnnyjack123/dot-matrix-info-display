@@ -3,10 +3,10 @@ from serial.tools import list_ports
 import time
 import threading
 
-from outsourced_functions import read, save
-from python_serial_debug_window import send_messages
-import global_variables as global_variables
-from logger import logger
+from Dot_Matrix_Panel.outsourced_functions import read, save
+from Dot_Matrix_Panel.python_serial_debug_window import send_messages
+import Dot_Matrix_Panel.global_variables as global_variables
+from Dot_Matrix_Panel.logger import logger
 
 ser = None
 

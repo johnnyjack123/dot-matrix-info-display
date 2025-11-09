@@ -1,6 +1,6 @@
 from pathlib import Path
 import shutil
-import global_variables as global_variables
+import Dot_Matrix_Panel.global_variables as global_variables #Verstehe nicht, warum Dot_Matrix_Panel.global_varables sein muss, aber funktioniert nur so
 
 project_dir = Path(global_variables.project_dir).resolve()
 

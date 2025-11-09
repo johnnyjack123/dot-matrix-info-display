@@ -9,6 +9,9 @@ sys.path.insert(0, project_dir)
 dot_matrix_dir = os.path.join(project_dir, "Dot_Matrix_Panel")
 sys.path.insert(0, dot_matrix_dir)
 
+import Dot_Matrix_Panel.global_variables as global_variables
+global_variables.project_dir = project_dir
+
 import requests
 import subprocess
 import zipfile
@@ -16,9 +19,7 @@ import io
 import Dot_Matrix_Panel.safe_shutil as shutil
 from Dot_Matrix_Panel.outsourced_functions import read, migrate_config, create_userdata, check_for_updates, create_folders
 from Dot_Matrix_Panel.logger import logger
-import Dot_Matrix_Panel.global_variables as global_variables
 
-global_variables.project_dir = project_dir
 logger.info(f"Project directory: {project_dir}")
 def check_internet_connection(url="https://www.google.com", timeout=5):
     try:
@@ -141,8 +142,11 @@ def update():
 
 def launch_app():
     python_executable = sys.executable  # das ist der aktuell laufende/interaktive venv-Python
-    script_path = os.path.join("Dot_Matrix_Panel", "Dot-Matrix_Main.py")
-    subprocess.Popen([python_executable, script_path])
+    subprocess.Popen([
+        python_executable,
+        "-m", "Dot_Matrix_Panel.Dot-Matrix_Main",
+        "--project-dir", os.path.abspath(".")
+    ])
     logger.info("Exit launcher.")
     sys.exit()
 

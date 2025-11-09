@@ -1,7 +1,7 @@
 from flask import Flask, render_template_string
 from flask_socketio import SocketIO
 import threading
-from logger import logger
+from Dot_Matrix_Panel.logger import logger
 
 # Flask App für Serial Monitor
 monitor_app = Flask(__name__)

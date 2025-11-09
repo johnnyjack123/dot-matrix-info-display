@@ -1,15 +1,14 @@
 import json
 import os
-import safe_shutil as shutil
+import Dot_Matrix_Panel.safe_shutil as shutil
 from Dot_Matrix_Panel.safe_shutil import _check_path
 from uuid import uuid4
 import threading
 
-import global_variables as global_variables
-from sockets import send_socket
-from logger import logger
+import Dot_Matrix_Panel.global_variables as global_variables
+from Dot_Matrix_Panel.sockets import send_socket
+from Dot_Matrix_Panel.logger import logger
 import requests
-from pathlib import Path
 
 userdata_file_path = "userdata.json"
 
