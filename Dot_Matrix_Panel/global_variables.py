@@ -2,11 +2,13 @@ screen = ""
 send_thread = False
 connected = False
 handshake = False
+project_dir = ""
 
 userdata_dict = {"username": "",
                 "weather_api_key": "",
                 "city": "",
-                "open": "App"
+                "open": "App",
+                "auto_update": "yes"
 }
 
 esp_data_dict = {   "ip": "",
@@ -16,5 +18,7 @@ esp_data_dict = {   "ip": "",
 }
 
 server_data_dict = {
-        "secret_key": ""
+        "secret_key": "",
+        "update_branch": "feature_drop_and_fixes",
+        "update_repo": "johnnyjack123/dot-matrix-info-display"
 }

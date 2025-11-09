@@ -3,10 +3,10 @@ import unidecode
 import time
 import threading
 
-from outsourced_functions import read, save, calculate_messsage_length
-from sockets import send_socket
-import global_variables as global_variables
-from logger import logger
+from Dot_Matrix_Panel.outsourced_functions import read, calculate_messsage_length
+from Dot_Matrix_Panel.sockets import send_socket
+import Dot_Matrix_Panel.global_variables as global_variables
+from Dot_Matrix_Panel.logger import logger
 
 messages = []
 
@@ -52,7 +52,7 @@ def send():
             else:
                 time.sleep(1)
         else:
-            print("No userdata available")
+            logger.error("No userdata available for WIFI connection.")
             time.sleep(1)
 
                     #TODO Checking Connection

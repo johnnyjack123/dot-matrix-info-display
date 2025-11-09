@@ -28,15 +28,21 @@
             <label for="city" class="form-label">Your City</label>
             <input type="text" class="form-control" id="city" name="city" placeholder="Enter your city"/>
 
-            <p class="form-label">Launch in app window, otherwise it will start only in the browser (changes become active after a
-                    restart)</p>
-                <div>
-                    <label class="switch">
-                        <input type="checkbox" id="switch" name="switch" {% if switch_state %}checked{%
-                       endif %}>
-                        <span class="slider"></span>
-                    </label>
-                </div>
+            <p class="form-label">Launch in app window, otherwise it will start only in the browser (changes become active after a restart)</p>
+            <div>
+                <label class="switch">
+                    <input type="checkbox" id="switch" name="switch" value="yes">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <p class="form-label">Auto Update: Check to enable automatic updates</p>
+            <div>
+                <label class="switch">
+                    <input type="checkbox" id="auto_update_switch" name="auto_update_switch" value="yes">
+                    <span class="slider"></span>
+                </label>
+            </div>
 
             <button type="submit" class="btn btn-glass">Save Settings</button>
         </form>
@@ -48,33 +54,57 @@
 
 </div>
 <script>
+    // Payload aus Python mit tojson Filter
+    var payload = {{ payload | tojson }};
+
+    console.log('Payload:', payload);
+
+    // Setze die Checkboxen basierend auf dem Payload
+    document.addEventListener("DOMContentLoaded", () => {
+        // Switch für "open" (App Window)
+        var switchCheckbox = document.getElementById('switch');
+        if (payload.open === "yes") {
+            switchCheckbox.checked = true;
+        } else {
+            switchCheckbox.checked = false;
+        }
+
+        // Switch für "auto_update"
+        var autoUpdateCheckbox = document.getElementById('auto_update_switch');
+        if (payload.auto_update === "yes") {
+            autoUpdateCheckbox.checked = true;
+        } else {
+            autoUpdateCheckbox.checked = false;
+        }
+    });
+
     // navbar hover effect
-document.addEventListener("DOMContentLoaded", () => {
-  const menu = document.querySelector('.menu-bar');
-  const items = document.querySelectorAll('.menu-bar li');
-  const hoverBg = document.querySelector('.hover-bg');
+    document.addEventListener("DOMContentLoaded", () => {
+        const menu = document.querySelector('.menu-bar');
+        const items = document.querySelectorAll('.menu-bar li');
+        const hoverBg = document.querySelector('.hover-bg');
 
-  items.forEach(item => {
-    item.addEventListener('mouseenter', () => {
-      const rect = item.getBoundingClientRect();
-      const parentRect = menu.getBoundingClientRect();
+        items.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                const rect = item.getBoundingClientRect();
+                const parentRect = menu.getBoundingClientRect();
 
-      hoverBg.style.width = `${rect.width}px`;
-      hoverBg.style.left = `${rect.left - parentRect.left}px`;
-      hoverBg.style.opacity = '1';
-      hoverBg.style.transform = 'scale(1.08)';
+                hoverBg.style.width = `${rect.width}px`;
+                hoverBg.style.left = `${rect.left - parentRect.left}px`;
+                hoverBg.style.opacity = '1';
+                hoverBg.style.transform = 'scale(1.08)';
+            });
+
+            item.addEventListener('mouseleave', () => {
+                hoverBg.style.transform = 'scale(1)';
+            });
+        });
+
+        menu.addEventListener('mouseleave', () => {
+            hoverBg.style.opacity = '0';
+            hoverBg.style.transform = 'scale(1)';
+        });
     });
-
-    item.addEventListener('mouseleave', () => {
-      hoverBg.style.transform = 'scale(1)';
-    });
-  });
-
-  menu.addEventListener('mouseleave', () => {
-    hoverBg.style.opacity = '0';
-    hoverBg.style.transform = 'scale(1)';
-  });
-});
 </script>
 </body>
 </html>

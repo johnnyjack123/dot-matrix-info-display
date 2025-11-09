@@ -17,5 +17,3 @@ file_handler.setFormatter(formatter)
 # Handler dem Logger hinzufügen
 logger.addHandler(file_handler)
 
-#def log(level, msg):
-#    logger.log(getattr(logging, level.upper()), msg)
