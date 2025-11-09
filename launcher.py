@@ -111,11 +111,7 @@ def update():
         # 3. Temporär entpacken
         tmp_dir = "_tmp_update_dir"
         if os.path.exists(tmp_dir):
-            try:
-                check_file_access(tmp_dir)
-                shutil.rmtree(tmp_dir)
-            except PermissionError  as e:
-                logger.error(f"Permission error: {e}")
+            shutil.rmtree(tmp_dir)
 
         os.makedirs(tmp_dir, exist_ok=True)
 
