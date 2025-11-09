@@ -91,22 +91,21 @@ def update():
 
     folder_to_extract = "Dot_Matrix_Panel"
     target_folder = "Dot_Matrix_Panel"
-    state = True
 
     # 1. ZIP vom GitHub-Branch herunterladen
     zip_url = f"https://github.com/{repo}/archive/refs/heads/{branch}.zip"
-    print(f"🔄 Load ZIP from: {zip_url}")
+    print(f"Load ZIP from: {zip_url}")
     response = requests.get(zip_url)
 
     if response.status_code != 200:
-        print(f"❌ Download error: {response.status_code}")
-        logger.error(f"❌ Download error: {response.status_code}")
+        print(f"Download error: {response.status_code}")
+        logger.error(f"Download error: {response.status_code}")
         return
 
     # 2. ZIP im Arbeitsspeicher entpacken
     with zipfile.ZipFile(io.BytesIO(response.content)) as zip_ref:
         extracted_dirname = zip_ref.namelist()[0].split("/")[0]  # z.B. "dot-matrix-info-display-Thread-Monitoring"
-        print(f"📁 ZIP contents root directory: {extracted_dirname}")
+        print(f"ZIP contents root directory: {extracted_dirname}")
 
         # 3. Temporär entpacken
         tmp_dir = "_tmp_update_dir"
@@ -120,8 +119,8 @@ def update():
     source_folder = os.path.join(tmp_dir, extracted_dirname, folder_to_extract)
 
     if not os.path.exists(source_folder):
-        print(f"❌ Folder '{folder_to_extract}' not found in ZIP!")
-        logger.error(f"❌ Folder '{folder_to_extract}' not found in ZIP!")
+        print(f"Folder '{folder_to_extract}' not found in ZIP!")
+        logger.error(f"Folder '{folder_to_extract}' not found in ZIP!")
         return
 
     #old_main_path = os.path.join("tmp", "old_files", "main")
@@ -130,7 +129,11 @@ def update():
         update_successful = safe_replace_folder(source_folder, target_folder)
         if not update_successful:
             logger.error("Update aborted, old version restored.")
-            return
+            print("Update aborted, old version restored.")
+            launch_app()
+        else:
+            logger.info("Update successfully installed.")
+            print("Update successfully installed.")
     else:
         logger.error("Target folder doesn´t exists.")
     launch_app()
@@ -162,9 +165,12 @@ if check_internet_connection() and auto_update == "yes":
     update_mode = "main"
     result = check_for_updates(url_version, file_name, update_mode)
     if result == "Update":
-        logger.info("Update main program.")
+        logger.info("Update main program...")
+        print("Update main program...")
         update()
     elif result == "Launch":
+        logger.info("Program is up to date.")
+        print("Program is up to date.")
         launch_app()
     else:
         logger.error(f"Error in update process: {result}")
