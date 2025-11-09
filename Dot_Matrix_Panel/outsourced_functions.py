@@ -213,6 +213,8 @@ def check_for_updates(url_version, file_name, update):
         return "Launch"
 
 def get_file(url, save_path):
+    file = read()
+    server_data = file["server_data"]
     response_version = requests.get(url)
     if response_version.status_code == 200:
         with open(save_path, "wb") as file:
@@ -220,7 +222,7 @@ def get_file(url, save_path):
             logger.info(f"{save_path} stored in /tmp")
             return True
     else:
-        logger.error(f"File {save_path} is unreachable on repo {global_variables.repo} and branch {global_variables.branch}.")
+        logger.error(f"File {save_path} is unreachable on repo {server_data["update_repo"]} and branch {server_data["update_branch"]}.")
         return False
 
 def update_launcher():
