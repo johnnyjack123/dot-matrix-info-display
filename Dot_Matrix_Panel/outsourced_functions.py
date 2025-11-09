@@ -192,6 +192,10 @@ def check_for_updates(url_version, file_name, update):
             else:
                 return f"Wrong update mode set: {update}."
 
+            if not os.path.exists(version_file):
+                with open(version_file, "w", encoding="utf-8") as f:
+                    f.write("0.0")
+
             with open(version_file, "r", encoding="utf-8") as file:
                 program_version = float(file.read().strip())
             with open(new_version_file, "r", encoding="utf-8") as file:

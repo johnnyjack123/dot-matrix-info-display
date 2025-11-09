@@ -81,9 +81,6 @@ def safe_replace_folder(source_folder, target_folder):
         return False
 
 def update():
-    print("Updating...")
-    logger.info("Updating...")
-
     file = read()
     server_data = file["server_data"]
     branch = server_data["update_branch"]
